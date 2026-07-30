@@ -1,6 +1,12 @@
 <?php
 namespace App\Services;
 
+/**
+ * Helper functions for the application.
+ * 
+ * Collects utility methods that are used across different parts of the application, such as escaping output, generating CSS classes based on character status, and building query strings.
+ */
+
 class Helpers
 {
     /**
@@ -9,7 +15,7 @@ class Helpers
      * @param string $string The string to escape.
      * @return string The escaped string.
      */
-    public function escape(string $string): string
+    public static function escape(string $string): string
     {
         return htmlspecialchars($string, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
@@ -20,7 +26,7 @@ class Helpers
      * @param string $status The status of the character (e.g., "Alive", "Dead", "Unknown").
      * @return string The corresponding CSS classes for styling.
      */
-    public function getStatusClasses(string $status): string
+    public static function getStatusClasses(string $status): string
     {
         return match (strtolower($status)) {
             'alive' => 'bg-green-500/20 text-green-400 border-green-500/30',
