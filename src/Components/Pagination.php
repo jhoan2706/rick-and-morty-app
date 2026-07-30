@@ -15,15 +15,18 @@ class Pagination
         }
 
         $pages = self::getPageRange($currentPage, $totalPages);
+        $baseParams = array_filter($filters, fn($key) => $key !== 'page', ARRAY_FILTER_USE_KEY);
 
-        $baseParams = array_filter($filters, fn($value) => $value !== 'page', ARRAY_FILTER_USE_KEY);
-
-        $html = '<nav class="flex justify-center items-center space-x-4 mt-6" aria-label="Pagination">';
+        // Changed: flex-wrap + gap-2 for responsive wrapping, hidden md:flex for mobile pagination
+        $html = '<nav class="flex flex-col items-center gap-3 mt-6" aria-label="Pagination">';
+        
+        // Page buttons row - wraps on small screens
+        $html .= '<div class="flex flex-wrap justify-center items-center gap-2">';
 
         $prevDisabled = $currentPage <= 1;
         $html .= self::renderPageButton(
             $prevDisabled ? '#' : Helpers::buildQueryString($baseParams, ['page' => $currentPage - 1]),
-            'Previous',
+            'Prev',
             $prevDisabled,
             true
         );
@@ -31,15 +34,15 @@ class Pagination
         // Page numbers
         foreach ($pages as $page) {
             if ($page === '...') {
-                $html .= '<span class="px-3 py-2 text-slate-500">...</span>';
+                $html .= '<span class="px-2 py-1 text-slate-500 text-sm">...</span>';
             } else {
                 $isActive = $page === $currentPage;
                 $url = Helpers::buildQueryString($baseParams, ['page' => $page]);
 
                 if ($isActive) {
                     $html .= <<<HTML
-                    <span class="px-4 py-2 bg-green-500/20 text-green-400 font-semibold rounded-lg 
-                                 border border-green-500/30" 
+                    <span class="px-3 py-1.5 bg-green-500/20 text-green-400 font-semibold rounded-lg 
+                                 border border-green-500/30 text-sm" 
                           aria-current="page">
                         {$page}
                     </span>
@@ -47,8 +50,8 @@ class Pagination
                 } else {
                     $html .= <<<HTML
                     <a href="{$url}" 
-                       class="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg 
-                              transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                       class="px-3 py-1.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg 
+                              transition-all duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400/50"
                        aria-label="Go to page {$page}">
                         {$page}
                     </a>
@@ -66,9 +69,11 @@ class Pagination
             false
         );
 
-        // Page info text
+        $html .= '</div>';
+
+        // Page info - always below buttons
         $html .= <<<HTML
-        <span class="ml-4 text-sm text-slate-400">
+        <span class="text-sm text-slate-400">
             Page {$currentPage} of {$totalPages}
         </span>
         HTML;
@@ -130,7 +135,7 @@ class Pagination
         $enabledClasses = 'hover:bg-slate-700/50 hover:text-white transition-all duration-200';
         
         $classes = $disabled ? $disabledClasses : $enabledClasses;
-        $classes .= ' px-4 py-2 text-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400/50';
+        $classes .= ' px-3 py-1.5 text-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400/50';
         
         $arrow = $isPrevious ? '←' : '→';
         $prefix = $isPrevious ? $arrow . ' ' : '';
