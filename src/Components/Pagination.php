@@ -2,7 +2,7 @@
 
 namespace App\Components;
 
-use App\Services\Helpers;
+use App\Utils\Helpers;
 
 class Pagination
 {

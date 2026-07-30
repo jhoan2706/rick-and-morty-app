@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Components;
 
-use App\Services\Helpers;
+use App\Utils\Helpers;
 
 /** 
  * Character Card Component

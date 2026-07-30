@@ -1,31 +1,21 @@
 <?php
 
-namespace App\Services;
+namespace App\Components;
 
-use App\Services\Helpers;
-
-/**
- * Search Filters Component
- * 
- * Renders the search bar and filter dropdowns for the Rick and Morty character search. It allows users to filter characters by name, status, species, and gender. The component is designed to be responsive and accessible, with proper ARIA labels and keyboard navigation support.
- * 
- * Filters supported: name, status, species, gender
- */
+use App\Utils\Helpers;
 
 class SearchFilters
 {
-    private const STATUS_OPTIONS = ['', 'alive', 'dead', 'unknown'];
-    private const SPECIES_OPTIONS = ['', 'Human', 'Alien', 'Humanoid', 'Poopybutthole', 'Mythological', 'Animal', 'Robot', 'Cronenberg', 'Disease', 'Unknown', 'Planet'];
-    private const GENDER_OPTIONS = ['', 'female', 'male', 'genderless', ' unknown'];
+    private const STATUS_OPTIONS = ['alive', 'dead', 'unknown'];
+    private const SPECIES_OPTIONS = ['Human', 'Alien', 'Humanoid', 'Poopybutthole', 'Mythological', 'Animal', 'Robot', 'Cronenberg', 'Disease', 'Unknown', 'Planet'];
+    private const GENDER_OPTIONS = ['female', 'male', 'genderless', 'unknown'];
 
+    private const STATUS_ICONS = [
+        'alive' => '🟢',
+        'dead' => '🔴',
+        'unknown' => '⚪',
+    ];
 
-    /**
-     * Render search filters form with current filter values.
-     * 
-     * @param array $currentFilters The current filter values (name
-     * status, species, gender) to pre-fill the form inputs.
-     * @return string The HTML of the search filters form.
-     */
     public static function render(array $currentFilters = []): string
     {
         $name = Helpers::escape($currentFilters['name'] ?? '');
@@ -63,9 +53,7 @@ class SearchFilters
                         aria-label="Filter by status"
                     >
                         <option value="">All Statuses</option>
-                        <option value="alive" {$this->selected('alive',$currentStatus)}>🟢 Alive</option>
-                        <option value="dead" {$this->selected('dead',$currentStatus)}>🔴 Dead</option>
-                        <option value="unknown" {$this->selected('unknown',$currentStatus)}>⚪ Unknown</option>
+                        {self::renderStatusOptions($currentStatus)}
                     </select>
                 </div>
                 
@@ -82,7 +70,7 @@ class SearchFilters
                         aria-label="Filter by species"
                     >
                         <option value="">All Species</option>
-                        {$this->renderOptions(self::SPECIES_OPTIONS,$currentSpecies)}
+                        {self::renderOptions(self::SPECIES_OPTIONS, $currentSpecies)}
                     </select>
                 </div>
                 
@@ -99,10 +87,7 @@ class SearchFilters
                         aria-label="Filter by gender"
                     >
                         <option value="">All Genders</option>
-                        <option value="female" {$this->selected('female',$currentGender)}>Female</option>
-                        <option value="male" {$this->selected('male',$currentGender)}>Male</option>
-                        <option value="genderless" {$this->selected('genderless',$currentGender)}>Genderless</option>
-                        <option value="unknown" {$this->selected('unknown',$currentGender)}>Unknown</option>
+                        {self::renderOptions(self::GENDER_OPTIONS, $currentGender)}
                     </select>
                 </div>
             </div>
@@ -129,27 +114,30 @@ class SearchFilters
         HTML;
     }
 
-    /**
-     * Generate selected attribute for option elements based on current filter values.
-     */
-    private function selected(string $value, string $current): string
+    private static function selected(string $value, string $current): string
     {
         return $value === $current ? 'selected' : '';
     }
 
-    /**
-     * Render option elements for select inputs based on provided options and current filter values.
-     */
-    private function renderOptions(array $options, string $current): string
+    private static function renderOptions(array $options, string $current): string
     {
         $html = '';
         foreach ($options as $option) {
-            if ($option === '') continue; // Skip empty option, already handled in the select
-            $selected = $this->selected(strtolower($option), strtolower($current));
-            $escapedOption = Helpers::escape($option);
-            $html .= "<option value=\"{$escapedOption}\" {$selected}>{$escapedOption}</option>";
+            $selected = self::selected(strtolower($option), strtolower($current));
+            $escaped = Helpers::escape($option);
+            $html .= "<option value=\"{$escaped}\" {$selected}>{$escaped}</option>";
         }
         return $html;
     }
 
+    private static function renderStatusOptions(string $current): string
+    {
+        $html = '';
+        foreach (self::STATUS_OPTIONS as $status) {
+            $selected = self::selected($status, $current);
+            $icon = self::STATUS_ICONS[$status] ?? '';
+            $html .= "<option value=\"{$status}\" {$selected}>{$icon} " . ucfirst($status) . "</option>";
+        }
+        return $html;
+    }
 }

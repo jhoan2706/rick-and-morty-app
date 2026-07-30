@@ -1,5 +1,5 @@
 <?php
-namespace App\Services;
+namespace App\Utils;
 
 /**
  * Helper functions for the application.
