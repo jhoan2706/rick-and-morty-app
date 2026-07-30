@@ -6,16 +6,15 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // We will extend this theme according to the Figma design
       colors: {
-        // Analizing the Figma, I define custom colors  
-        'rm-green': '#97ce4c',
-        'rm-dark': '#1a1a2e',
-        'rm-dark-blue': '#16213e',
-        'rm-card-bg': '#0f3460',
-        'rm-alive': '#55cc44',
-        'rm-dead': '#d63d2e',
-        'rm-unknown': '#9e9e9e',
+        primary: {
+          100: '#EEE3FF',
+          600: '#8054C7',
+          700: '#5A3696',
+        },
+        secondary: {
+          600: '#63D838',
+        },
       },
     },
   },
