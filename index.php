@@ -57,10 +57,6 @@ if ($selectedId) {
         <?php else: ?>
             <?= CharacterList::render($characters, $selectedId, $starredIds) ?>
         <?php endif; ?>
-        
-        <div class="p-4 border-t border-gray-100 text-xs text-gray-400 flex-shrink-0">
-            <?= $info['count'] ?> characters
-        </div>
     </aside>
 
     <?= CharacterDetail::render($selectedCharacter) ?>
