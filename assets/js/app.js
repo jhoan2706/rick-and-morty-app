@@ -1,105 +1,64 @@
-/**
- * Rick and Morty Explorer - Client-side Enhancements
- * 
- * This script handles:
- * - Smooth scrolling
- * - Image lazy loading with Intersection Observer
- * - Keyboard navigation enhancements
- * - Filter form auto-submit (optional)
- */
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     
-    // Initialize Intersection Observer for lazy loading images
-    initializeLazyLoading();
+    var STORAGE_KEY = 'rm-favorites';
     
-    // Add keyboard shortcut for search focus
-    initializeKeyboardShortcuts();
-    
-    // Smooth scroll to top when pagination links are clicked
-    enhancePaginationLinks();
-    
-    /**
-     * Lazy loading using Intersection Observer API
-     * This provides a more performant experience for large character lists
-     */
-    function initializeLazyLoading() {
-        const images = document.querySelectorAll('img[loading="lazy"]');
-        
-        if ('loading' in HTMLImageElement.prototype) {
-            // Browser supports native lazy loading, no need for JS implementation
-            return;
-        }
-        
-        // Fallback for browsers that don't support native lazy loading
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    
-                    if (img.dataset.src) {
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                    }
-                    
-                    // Add fade-in animation
-                    img.classList.add('opacity-100');
-                    img.style.transition = 'opacity 0.5s ease-in-out';
-                    
-                    observer.unobserve(img);
-                }
-            });
-        }, {
-            rootMargin: '50px 0px',
-            threshold: 0.01
-        });
-        
-        images.forEach(img => {
-            if (!img.src || img.src === '') {
-                img.style.opacity = '0';
-                imageObserver.observe(img);
-            }
-        });
+    function getFavs() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { return []; }
     }
     
-    /**
-     * Keyboard shortcut: Press "/" to focus on search input
-     */
-    function initializeKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            // Don't trigger if user is typing in an input
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                return;
-            }
+    function saveFavs(ids) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+    }
+    
+    var favs = getFavs();
+    var buttons = document.querySelectorAll('.favorite-btn');
+    
+    buttons.forEach(function(btn) {
+        var id = parseInt(btn.dataset.id);
+        var icon = btn.querySelector('.heart-icon');
+        
+        if (favs.indexOf(id) > -1 && icon) {
+            setActive(icon, true);
+        }
+        
+        btn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             
-            if (e.key === '/') {
-                e.preventDefault();
-                const searchInput = document.querySelector('input[name="name"]');
-                if (searchInput) {
-                    searchInput.focus();
-                    searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-        });
-    }
-    
-    /**
-     * Enhance pagination with smooth scrolling
-     */
-    function enhancePaginationLinks() {
-        const paginationLinks = document.querySelectorAll('a[aria-label*="Go to page"], a[aria-label*="page"]');
-        
-        paginationLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                // Store scroll position before navigation
-                sessionStorage.setItem('scrollRestoration', 'top');
+            var id = parseInt(this.dataset.id);
+            var f = getFavs();
+            var idx = f.indexOf(id);
+            
+            if (idx > -1) { f.splice(idx, 1); }
+            else { f.push(id); }
+            
+            saveFavs(f);
+            var active = f.indexOf(id) > -1;
+            
+            document.querySelectorAll('.favorite-btn[data-id="' + id + '"]').forEach(function(b) {
+                var i = b.querySelector('.heart-icon');
+                if (i) setActive(i, active);
             });
-        });
-        
-        // Restore scroll position after page load
-        if (sessionStorage.getItem('scrollRestoration') === 'top') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            sessionStorage.removeItem('scrollRestoration');
+            
+            return false;
+        };
+    });
+    
+    function setActive(icon, active) {
+        if (active) {
+            // Verde sólido
+            icon.classList.add('text-secondary-600');
+            icon.classList.remove('text-gray-400');
+            icon.setAttribute('fill', 'currentColor');
+            icon.setAttribute('stroke', 'none');
+        } else {
+            // Borde gris, fondo blanco
+            icon.classList.remove('text-secondary-600');
+            icon.classList.add('text-gray-400');
+            icon.setAttribute('fill', 'none');
+            icon.setAttribute('stroke', 'currentColor');
         }
     }
+    
+    console.log('✅ Favorites ready. Buttons:', buttons.length);
 });

@@ -65,5 +65,6 @@ if ($selectedId) {
 
     <?= CharacterDetail::render($selectedCharacter) ?>
 
+<script src="assets/js/app.js"></script>
 </body>
 </html>

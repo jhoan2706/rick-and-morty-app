@@ -27,10 +27,7 @@ class CharacterDetail
         $origin = Helpers::escape($character['origin']['name'] ?? 'Unknown');
         $location = Helpers::escape($character['location']['name'] ?? 'Unknown');
         $image = Helpers::escape($character['image'] ?? '');
-        $type = Helpers::escape($character['type'] ?? '');
         $id = (int)($character['id'] ?? 0);
-        
-        $occupation = $type ?: ($species === 'Human' ? 'Unknown' : $species);
         
         $statusColors = [
             'Alive' => 'text-secondary-600 bg-green-50',
@@ -44,8 +41,8 @@ class CharacterDetail
         
         $html .= '<div class="flex items-end">';
         $html .= '<img src="' . $image . '" alt="' . $name . '" class="h-[75px] w-[75px] rounded-full object-cover" />';
-        $html .= '<button class="ml-[-18px] w-8 h-8 rounded-full bg-white shadow flex items-center justify-center hover:shadow-md transition-shadow favorite-btn" data-id="' . $id . '" aria-label="Add to favorites">';
-        $html .= '<svg class="w-4 h-4 text-gray-400 hover:text-secondary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
+        $html .= '<button class="ml-[-18px] w-8 h-8 rounded-full bg-white shadow flex items-center justify-center hover:shadow-md transition-shadow favorite-btn" data-id="' . $id . '" aria-label="Toggle favorite">';
+        $html .= '<svg class="w-4 h-4 heart-icon text-gray-400 hover:text-secondary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">';
         $html .= '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>';
         $html .= '</svg></button>';
         $html .= '</div>';
@@ -62,11 +59,6 @@ class CharacterDetail
         $html .= '<div class="border-b border-gray-200 pb-6">';
         $html .= '<p class="font-semibold text-gray-900">Status</p>';
         $html .= '<p class="text-gray-500 mt-1"><span class="inline-block px-3 py-1 rounded-full text-xs font-medium ' . $statusColor . '">' . $status . '</span></p>';
-        $html .= '</div>';
-        
-        $html .= '<div class="border-b border-gray-200 pb-6">';
-        $html .= '<p class="font-semibold text-gray-900">Occupation</p>';
-        $html .= '<p class="text-gray-500 mt-1">' . $occupation . '</p>';
         $html .= '</div>';
         
         $html .= '<div class="border-b border-gray-200 pb-6">';
