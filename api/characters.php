@@ -16,6 +16,7 @@ if ($ids) {
     foreach ($idArray as $id) {
         try {
             $c = $api->getCharacterById((int)$id);
+            // Para la sección starred, nunca hay selección activa
             $html .= App\Components\CharacterListItem::render($c, false, true);
         } catch (\Exception $e) {}
     }
@@ -24,6 +25,7 @@ if ($ids) {
 }
 
 // === PAGINATED ===
+$selectedId = isset($_GET['selected_id']) ? (int)$_GET['selected_id'] : null;
 $page = max(1, (int)($_GET['page'] ?? 1));
 $name = $_GET['name'] ?? null;
 $status = $_GET['status'] ?? null;
@@ -82,7 +84,8 @@ try {
             
             $html = '';
             foreach ($pagedCharacters as $c) {
-                $html .= App\Components\CharacterListItem::render($c, false, true);
+                $isActive = ($selectedId && isset($c['id']) && (int)$c['id'] === $selectedId);
+                $html .= App\Components\CharacterListItem::render($c, $isActive, true);
             }
             
             $hasMore = ($offset + $pageSize) < $totalFiltered;
@@ -105,7 +108,8 @@ try {
             $html = '';
             foreach ($data['results'] ?? [] as $c) {
                 if (!in_array($c['id'], $starredIds)) {
-                    $html .= App\Components\CharacterListItem::render($c, false, false);
+                    $isActive = ($selectedId && isset($c['id']) && (int)$c['id'] === $selectedId);
+                    $html .= App\Components\CharacterListItem::render($c, $isActive, false);
                 }
             }
             echo json_encode([
@@ -129,7 +133,8 @@ try {
     $data = $api->getCharacters($apiFilters, $page);
     $html = '';
     foreach ($data['results'] ?? [] as $c) {
-        $html .= App\Components\CharacterListItem::render($c, false, false);
+        $isActive = ($selectedId && isset($c['id']) && (int)$c['id'] === $selectedId);
+        $html .= App\Components\CharacterListItem::render($c, $isActive, false);
     }
     echo json_encode([
         'html' => $html,

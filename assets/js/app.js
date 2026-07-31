@@ -2,30 +2,70 @@ document.addEventListener("DOMContentLoaded", function () {
   console.log("🚀 App iniciada");
 
   // ==========================================
-  // POPOVER - OPEN/CLOSE
+  // POPOVER - OPEN/CLOSE (MODIFICADO)
   // ==========================================
   const toggleBtn = document.getElementById("filters-toggle");
   const popup = document.getElementById("filters-popup");
+  const searchInput = document.getElementById("search-input");
+
+  function openPopup() {
+    if (popup) {
+      popup.classList.remove("hidden");
+      console.log("🔄 Popup: visible");
+
+      // Enfocar el input de búsqueda cuando se abre el popup
+      if (searchInput) {
+        searchInput.removeAttribute("readonly");
+        setTimeout(function () {
+          searchInput.focus();
+        }, 100);
+      }
+    }
+  }
+
+  function closePopup() {
+    if (popup) {
+      popup.classList.add("hidden");
+      console.log("📦 Popup cerrado");
+
+      // Volver a poner readonly al input
+      if (searchInput) {
+        searchInput.setAttribute("readonly", true);
+      }
+    }
+  }
 
   if (toggleBtn && popup) {
     toggleBtn.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
-      popup.classList.toggle("hidden");
-      console.log(
-        "🔄 Popup:",
-        popup.classList.contains("hidden") ? "oculto" : "visible",
-      );
+
+      if (popup.classList.contains("hidden")) {
+        openPopup();
+      } else {
+        closePopup();
+      }
     });
+
+    // ABRIR POPUP AL HACER CLICK EN EL INPUT DE BÚSQUEDA
+    if (searchInput) {
+      searchInput.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (popup.classList.contains("hidden")) {
+          openPopup();
+        }
+      });
+    }
 
     document.addEventListener("click", function (e) {
       if (
         !popup.classList.contains("hidden") &&
         !popup.contains(e.target) &&
-        !toggleBtn.contains(e.target)
+        !toggleBtn.contains(e.target) &&
+        !(searchInput && searchInput.contains(e.target))
       ) {
-        popup.classList.add("hidden");
-        console.log("📦 Popup cerrado");
+        closePopup();
       }
     });
   }
@@ -39,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // ==========================================
-  // FILTER BUTTON - HABILITAR SOLO CON CAMBIOS
+  // FILTER BUTTON - HABILITAR CON CAMBIOS (INCLUYE TEXTO DEL BUSCADOR)
   // ==========================================
   function checkFilterChanges() {
     const applyBtn = document.getElementById("apply-filters");
@@ -48,6 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const params = new URLSearchParams(window.location.search);
     const currentStatus = params.get("status") || "";
     const currentSpecies = params.get("species") || "";
+    const currentName = params.get("name") || "";
 
     let currentCharacter = "All";
     if (currentStatus === "starred") {
@@ -59,10 +100,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const currentSpeciesUI = currentSpecies || "All";
+    
+    // Obtener el texto actual del input de búsqueda
+    const searchInputValue = searchInput ? searchInput.value.trim() : "";
 
     const characterChanged = selectedFilters.character !== currentCharacter;
     const speciesChanged = selectedFilters.species !== currentSpeciesUI;
-    const hasChanges = characterChanged || speciesChanged;
+    const nameChanged = searchInputValue !== currentName;
+    
+    const hasChanges = characterChanged || speciesChanged || nameChanged;
 
     if (hasChanges) {
       applyBtn.disabled = false;
@@ -135,6 +181,14 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log("📋 Filtros actuales:", selectedFilters);
     });
   });
+
+  // DETECTAR ESCRITURA EN EL INPUT DE BÚSQUEDA
+  if (searchInput) {
+    searchInput.addEventListener("input", function() {
+      checkFilterChanges();
+      console.log("📝 Texto buscador:", searchInput.value);
+    });
+  }
 
   // Inicializar filtros desde URL
   (function initFiltersFromURL() {
@@ -289,11 +343,13 @@ document.addEventListener("DOMContentLoaded", function () {
     var name = params.get("name") || "";
     var status = params.get("status") || "";
     var species = params.get("species") || "";
+    var selectedId = params.get("id") || "";
 
     var url = "api/characters.php?page=" + page;
     if (name) url += "&name=" + encodeURIComponent(name);
     if (status) url += "&status=" + encodeURIComponent(status);
     if (species) url += "&species=" + encodeURIComponent(species);
+    if (selectedId) url += "&selected_id=" + selectedId;
 
     // Si el filtro es "starred", pasar los IDs de favoritos
     if (status === "starred" || status === "others") {
@@ -384,11 +440,13 @@ document.addEventListener("DOMContentLoaded", function () {
     var name = params.get("name") || "";
     var status = params.get("status") || "";
     var species = params.get("species") || "";
+    var selectedId = params.get("id") || "";
 
     var url = "api/characters.php?page=1";
     if (name) url += "&name=" + encodeURIComponent(name);
     if (status) url += "&status=" + encodeURIComponent(status);
     if (species) url += "&species=" + encodeURIComponent(species);
+    if (selectedId) url += "&selected_id=" + selectedId;
 
     // ¡AGREGAR ESTO! Pasar IDs de favoritos cuando sea necesario
     if (status === "starred" || status === "others") {

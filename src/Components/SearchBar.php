@@ -21,11 +21,13 @@ class SearchBar
                     <input 
                         type="text" 
                         name="name" 
+                        id="search-input"
                         value="' . $name . '" 
                         placeholder="Search or filter results" 
-                        class="flex-1 bg-transparent px-3 outline-none text-sm text-gray-900 placeholder-gray-500"
+                        class="flex-1 bg-transparent px-3 outline-none text-sm text-gray-900 placeholder-gray-500 cursor-pointer"
                         aria-label="Search characters"
                         autocomplete="off"
+                        readonly
                     />
                     
                     <button 

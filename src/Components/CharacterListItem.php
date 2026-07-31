@@ -14,9 +14,14 @@ class CharacterListItem
         $id = (int)($character['id'] ?? 0);
         $bg = $isActive ? 'bg-primary-100' : 'hover:bg-gray-50';
         
+        // Mantener filtros actuales al hacer clic
+        $currentParams = $_GET;
+        $currentParams['id'] = $id;
+        $queryString = http_build_query($currentParams);
+        
         return '
         <div class="flex w-full items-center rounded-none border-t border-gray-200 px-5 py-4 ' . $bg . ' transition-colors group">
-            <a href="?id=' . $id . '" class="flex items-center flex-1 min-w-0">
+            <a href="?' . $queryString . '" class="flex items-center flex-1 min-w-0">
                 <img src="' . $image . '" alt="' . $name . '" class="h-8 w-8 rounded-full object-cover flex-shrink-0" loading="lazy" />
                 <div class="ml-4 flex-1 text-left min-w-0">
                     <p class="font-semibold text-gray-900 text-sm truncate">' . $name . '</p>

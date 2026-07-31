@@ -22,7 +22,10 @@ class CharacterList
             $html .= '<p class="px-6 py-4 text-sm text-gray-400">No characters found</p>';
         } else {
             foreach ($characters as $character) {
-                $html .= CharacterListItem::render($character, false, false);
+                $charId = (int)($character['id'] ?? 0);
+                $isActive = ($selectedId && $charId === $selectedId);
+                $isStarred = in_array($charId, $starredIds);
+                $html .= CharacterListItem::render($character, $isActive, $isStarred);
             }
         }
         
