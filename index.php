@@ -10,7 +10,12 @@ use App\Components\SearchBar;
 use App\Components\CharacterList;
 use App\Components\CharacterDetail;
 
-$filters = ['name' => $_GET['name'] ?? null];
+$filters = [
+    'name' => $_GET['name'] ?? null,
+    'status' => $_GET['status'] ?? null,
+    'species' => $_GET['species'] ?? null,
+    'gender' => $_GET['gender'] ?? null,
+];
 $selectedId = isset($_GET['id']) ? (int)$_GET['id'] : null;
 $starredIds = isset($_COOKIE['starred']) ? json_decode($_COOKIE['starred'], true) : [];
 
@@ -49,6 +54,8 @@ if ($selectedId) {
     <aside class="w-[375px] border-r border-gray-100 bg-white flex flex-col flex-shrink-0 h-screen overflow-hidden">
         <div class="px-6 pt-12 flex-shrink-0">
             <h1 class="text-[24px] font-bold text-gray-900">Rick and Morty <span class="text-primary-600">list</span></h1>
+            
+            <!-- SearchBar contiene el botón Y el popover -->
             <?= SearchBar::render($filters) ?>
         </div>
         
@@ -61,6 +68,6 @@ if ($selectedId) {
 
     <?= CharacterDetail::render($selectedCharacter) ?>
 
-<script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>
