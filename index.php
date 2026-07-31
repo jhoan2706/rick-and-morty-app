@@ -50,11 +50,33 @@ if ($selectedId) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rick and Morty | Character Explorer</title>
     <link rel="stylesheet" href="assets/css/tailwind.css">
+    <style>
+        /* En mobile, el aside ocupa todo el ancho */
+        @media (max-width: 767px) {
+            .aside-main {
+                width: 100% !important;
+                border-right: none !important;
+            }
+            .detail-panel {
+                display: none !important;
+            }
+        }
+        /* En desktop, el aside tiene 375px y el detail se muestra */
+        @media (min-width: 768px) {
+            .aside-main {
+                width: 375px !important;
+                border-right: 1px solid #f3f4f6 !important;
+            }
+            .detail-panel {
+                display: block !important;
+            }
+        }
+    </style>
 </head>
 
 <body class="flex h-screen overflow-hidden bg-white">
 
-    <aside class="w-[375px] border-r border-gray-100 bg-white flex flex-col flex-shrink-0 h-screen overflow-hidden">
+    <aside class="aside-main border-r border-gray-100 bg-white flex flex-col flex-shrink-0 h-screen overflow-hidden">
         <div class="px-6 pt-12 flex-shrink-0">
             <h1 class="text-[24px] font-bold text-gray-900">
                 <a href="/rick-and-morty-app/" class="hover:opacity-80 transition-opacity">Rick and Morty list</a>
@@ -71,7 +93,9 @@ if ($selectedId) {
         <?php endif; ?>
     </aside>
 
-    <?= CharacterDetail::render($selectedCharacter) ?>
+    <div class="detail-panel flex-1">
+        <?= CharacterDetail::render($selectedCharacter) ?>
+    </div>
 
     <script src="assets/js/app.js"></script>
 </body>
