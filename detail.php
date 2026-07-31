@@ -42,6 +42,7 @@ if (!$character) {
         body {
             background: white;
         }
+
         .back-button {
             display: flex;
             flex-direction: row;
@@ -55,16 +56,20 @@ if (!$character) {
             transition: background-color 0.15s;
             margin: 16px 0 0 20px;
         }
+
         .back-button:hover {
             background-color: #f3f4f6;
         }
+
         .back-button svg {
             width: 32px;
             height: 32px;
         }
+
         .detail-content {
             padding: 0 16px 24px;
         }
+
         @media (min-width: 768px) {
             .detail-content {
                 padding: 0 100px 24px;
@@ -79,14 +84,16 @@ if (!$character) {
     <div>
         <a href="/rick-and-morty-app/" class="back-button">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#8054C7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#8054C7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
         </a>
     </div>
 
     <!-- Detail Content -->
     <div class="detail-content">
-        <?= CharacterDetail::render($character) ?>
+        <div class="detail-content">
+            <?= CharacterDetail::render($character, true) ?>
+        </div>
     </div>
 
     <script src="assets/js/app.js"></script>

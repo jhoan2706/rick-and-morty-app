@@ -52,35 +52,46 @@ if ($selectedId) {
     <title>Rick and Morty | Character Explorer</title>
     <link rel="stylesheet" href="assets/css/tailwind.css">
     <style>
-        /* En mobile, el aside ocupa todo el ancho */
         @media (max-width: 767px) {
             .aside-main {
                 width: 100% !important;
                 border-right: none !important;
             }
+
             .detail-panel {
                 display: none !important;
             }
+
             /* Hide the active character highlight in mobile */
             .character-item.bg-primary-100 {
                 background-color: transparent !important;
             }
+
             .character-item.bg-primary-100:hover {
                 background-color: #f9fafb !important;
             }
         }
+
         /* On desktop, the aside takes a fixed width */
         @media (min-width: 768px) {
             .aside-main {
                 width: 375px !important;
                 border-right: 1px solid #f3f4f6 !important;
             }
+
             .detail-panel {
                 display: flex !important;
                 flex: 1 !important;
                 height: 100vh !important;
             }
         }
+
+        @media (max-width: 767px) {
+            #apply-filters {
+                margin-top: 150% !important;
+            }
+        }
+
         .detail-panel {
             display: flex;
             flex: 1;
@@ -109,7 +120,9 @@ if ($selectedId) {
     </aside>
 
     <div class="detail-panel">
-        <?= CharacterDetail::render($selectedCharacter) ?>
+        <div class="detail-panel">
+            <?= CharacterDetail::render($selectedCharacter, false) ?>
+        </div>
     </div>
 
     <script src="assets/js/app.js"></script>

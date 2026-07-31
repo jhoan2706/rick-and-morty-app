@@ -6,7 +6,7 @@ use App\Utils\Helpers;
 
 class CharacterDetail
 {
-    public static function render(?array $character = null): string
+    public static function render(?array $character = null, bool $isMobile = false): string
     {
         if (!$character) {
             return '
@@ -37,7 +37,12 @@ class CharacterDetail
         $statusColor = $statusColors[$status] ?? 'text-gray-600 bg-gray-100';
         
         $html = '<main class="flex-1 bg-white overflow-y-auto h-full">';
-        $html .= '<div class="mx-auto max-w-[865px] px-[100px] pt-10">';
+
+        if ($isMobile) {
+            $html .= '<div class="pt-10" style="padding-left: 30px !important;">';
+        } else {
+            $html .= '<div class="pt-10" style="padding-left: 100px !important;">';
+        }
         
         $html .= '<div class="flex items-end">';
         $html .= '<img src="' . $image . '" alt="' . $name . '" class="h-[75px] w-[75px] rounded-full object-cover" />';
@@ -52,7 +57,7 @@ class CharacterDetail
         $html .= '<div class="mt-12 space-y-8">';
         
         $html .= '<div class="border-b border-gray-200 pb-6">';
-        $html .= '<p class="font-semibold text-gray-900">Species</p>';
+        $html .= '<p class="font-semibold text-gray-900">Specie</p>';
         $html .= '<p class="text-gray-500 mt-1">' . $species . '</p>';
         $html .= '</div>';
         
