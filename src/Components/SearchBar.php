@@ -46,7 +46,7 @@ class SearchBar
                 <input type="hidden" name="species" value="' . Helpers::escape($filters['species'] ?? '') . '" id="filter-species-hidden">
                 <input type="hidden" name="gender" value="' . Helpers::escape($filters['gender'] ?? '') . '" id="filter-gender-hidden">
                 
-                <!-- POPOVER DENTRO DEL FORM -->
+                <!-- POPOVER INSIDE THE SEARCH FORM -->
                 ' . SearchFilters::render($filters) . '
             </form>
         </div>';

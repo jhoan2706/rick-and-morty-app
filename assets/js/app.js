@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   // ==========================================
-  // POPOVER - OPEN/CLOSE (MODIFICADO)
+  // POPOVER - OPEN/CLOSE (MODIFIED)
   // ==========================================
   const toggleBtn = document.getElementById("filters-toggle");
   const popup = document.getElementById("filters-popup");
@@ -577,7 +577,7 @@ document.addEventListener("DOMContentLoaded", function () {
             loadMore(); 
           } else {
             console.error("❌ Max retries reached. Stopping further attempts.");
-            page++; // Restaurar página
+            page++; // Increment page back to avoid skipping
             retryCount = 0;
           }
         } else {
@@ -638,7 +638,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       })
       .catch(function (error) {
-        console.error("❌ Error recargando:", error);
+        console.error("❌ Error reloading characters:", error);
       });
   }
 
@@ -655,7 +655,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   setTimeout(function () {
     if (list.scrollHeight <= list.clientHeight + 100) loadMore();
-  }, 1000); // Aumentado a 1 segundo
+  }, 1000); // Delay to ensure initial content is loaded
 
   // ==========================================
   // APPLY FILTERS (NO RELOAD, UPDATE URL)
