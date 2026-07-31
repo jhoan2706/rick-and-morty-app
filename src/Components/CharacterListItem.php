@@ -20,8 +20,8 @@ class CharacterListItem
         $queryString = http_build_query($currentParams);
         
         return '
-        <div class="flex w-full items-center rounded-none border-t border-gray-200 px-5 py-4 ' . $bg . ' transition-colors group">
-            <a href="?' . $queryString . '" class="flex items-center flex-1 min-w-0">
+        <div class="flex w-full items-center rounded-none border-t border-gray-200 px-5 py-4 ' . $bg . ' transition-colors group character-item" data-character-id="' . $id . '">
+            <a href="?' . $queryString . '" class="flex items-center flex-1 min-w-0 character-link" data-id="' . $id . '">
                 <img src="' . $image . '" alt="' . $name . '" class="h-8 w-8 rounded-full object-cover flex-shrink-0" loading="lazy" />
                 <div class="ml-4 flex-1 text-left min-w-0">
                     <p class="font-semibold text-gray-900 text-sm truncate">' . $name . '</p>

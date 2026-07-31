@@ -23,7 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (species) activeFilters++;
     if (name) activeFilters++;
 
-    const filterText = activeFilters + " " + (activeFilters === 1 ? "Filter" : "Filters");
+    const filterText =
+      activeFilters + " " + (activeFilters === 1 ? "Filter" : "Filters");
     badge.textContent = filterText;
   }
 
@@ -502,7 +503,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   initFavButtons();
-  rebuildStarredFromLocalStorage();
+  // Only execute rebuildStarredFromLocalStorage if the starred section exists on the page
+  if (document.getElementById('starred-section')) {
+    rebuildStarredFromLocalStorage();
+  }
 
   // ==========================================
   // INFINITE SCROLL (WITH RETRY AND DELAY)
@@ -607,9 +611,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
           if (retryCount <= maxRetries) {
             console.warn(
-              "⚠️ Rate limit reached. Try " + retryCount + " of " + maxRetries
+              "⚠️ Rate limit reached. Try " + retryCount + " of " + maxRetries,
             );
-            loadMore(); 
+            loadMore();
           } else {
             console.error("❌ Max retries reached. Stopping further attempts.");
             page++; // Increment page back to avoid skipping
@@ -750,4 +754,45 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (popup) popup.classList.add("hidden");
     });
+
+  // ==========================================
+  // MOBILE REDIRECT - Redirect to detail page on mobile when clicking a character
+  // ==========================================
+  function isMobile() {
+    return window.innerWidth < 768;
+  }
+
+  function initMobileLinks() {
+    document.querySelectorAll(".character-link").forEach(function (link) {
+      if (link.dataset.mobileInit) return;
+      link.dataset.mobileInit = "1";
+
+      link.addEventListener("click", function (e) {
+        // Only redirect if the screen width is less than 768px (mobile)
+        if (isMobile()) {
+          e.preventDefault();
+          var id = this.dataset.id;
+          if (id) {
+            window.location.href = "detail.php?id=" + id;
+          }
+        }
+      });
+    });
+  }
+
+  // Init mobile links on page load and after loading more characters
+  initMobileLinks();
+
+  // This is to ensure that the mobile links are re-initialized after the favorite buttons and load more functionality are executed, as they may add new character items to the DOM.
+  var originalInitFav6 = initFavButtons;
+  initFavButtons = function () {
+    originalInitFav6();
+    initMobileLinks();
+  };
+
+  var originalLoadMore6 = loadMore;
+  loadMore = function () {
+    originalLoadMore6();
+    setTimeout(initMobileLinks, 100);
+  };
 });
