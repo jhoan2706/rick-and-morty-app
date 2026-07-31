@@ -67,7 +67,7 @@ if ($selectedId) {
         <?php if ($error): ?>
             <div class="flex-1 flex items-center justify-center text-red-500 text-sm">Failed to load</div>
         <?php else: ?>
-            <?= CharacterList::render($characters, $selectedId, $starredIds) ?>
+            <?= CharacterList::render($characters, $selectedId, $starredIds, $filters) ?>
         <?php endif; ?>
     </aside>
 

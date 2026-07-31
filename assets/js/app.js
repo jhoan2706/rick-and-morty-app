@@ -6,6 +6,27 @@ document.addEventListener("DOMContentLoaded", function () {
   const popup = document.getElementById("filters-popup");
   const searchInput = document.getElementById("search-input");
 
+  // ==========================================
+  // FUNCTION TO UPDATE FILTERS BADGE (MODIFIED)
+  // ==========================================
+  function updateFiltersBadge() {
+    const badge = document.getElementById("active-filters-badge");
+    if (!badge) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status") || "";
+    const species = params.get("species") || "";
+    const name = params.get("name") || "";
+
+    let activeFilters = 0;
+    if (status) activeFilters++;
+    if (species) activeFilters++;
+    if (name) activeFilters++;
+
+    const filterText = activeFilters + " " + (activeFilters === 1 ? "Filter" : "Filters");
+    badge.textContent = filterText;
+  }
+
   function openPopup() {
     if (popup) {
       popup.classList.remove("hidden");
@@ -495,6 +516,18 @@ document.addEventListener("DOMContentLoaded", function () {
   var retryCount = 0;
   var maxRetries = 3;
 
+  function updateCharacterCounts(count) {
+    var totalCountEl = document.getElementById("total-characters-count");
+    var charactersCountEl = document.getElementById("characters-count");
+
+    if (totalCountEl) {
+      totalCountEl.textContent = count;
+    }
+    if (charactersCountEl) {
+      charactersCountEl.textContent = count;
+    }
+  }
+
   function loadMore() {
     if (loading || done) return;
 
@@ -550,9 +583,14 @@ document.addEventListener("DOMContentLoaded", function () {
           div.innerHTML = data.html;
           while (div.firstChild) list.appendChild(div.firstChild);
           initFavButtons();
-          var countEl = document.getElementById("characters-count");
-          if (countEl)
-            countEl.textContent = parseInt(countEl.textContent) + data.count;
+
+          var totalCountEl = document.getElementById("total-characters-count");
+          var currentTotal = totalCountEl
+            ? parseInt(totalCountEl.textContent)
+            : 0;
+          var newTotal = currentTotal + data.count;
+          updateCharacterCounts(newTotal);
+          updateFiltersBadge();
         }
 
         if (!data.hasMore) {
@@ -569,10 +607,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           if (retryCount <= maxRetries) {
             console.warn(
-              "⚠️ Rate limit reached. Try " +
-                retryCount +
-                " of " +
-                maxRetries,
+              "⚠️ Rate limit reached. Try " + retryCount + " of " + maxRetries
             );
             loadMore(); 
           } else {
@@ -631,8 +666,8 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (data) {
         if (data.html) {
           list.innerHTML = data.html;
-          var countEl = document.getElementById("characters-count");
-          if (countEl) countEl.textContent = data.count || 0;
+          updateCharacterCounts(data.count || 0);
+          updateFiltersBadge();
           if (!data.hasMore) done = true;
           initFavButtons();
         }
@@ -655,7 +690,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   setTimeout(function () {
     if (list.scrollHeight <= list.clientHeight + 100) loadMore();
-  }, 1000); // Delay to ensure initial content is loaded
+  }, 1000);
+
+  // Init the filters badge on page load
+  setTimeout(function () {
+    updateFiltersBadge();
+  }, 100);
 
   // ==========================================
   // APPLY FILTERS (NO RELOAD, UPDATE URL)
@@ -707,7 +747,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Reload characters with the new filters
       reloadCharacters();
-      
+
       if (popup) popup.classList.add("hidden");
     });
 });

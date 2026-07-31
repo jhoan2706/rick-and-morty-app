@@ -34,7 +34,6 @@ class SearchBar
                         type="button" 
                         id="filters-toggle"
                         class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#EEE3FF] text-[#6B46C1] hover:bg-[#DDD0F5] transition-colors duration-200"
-                        aria-label="Open filters"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
