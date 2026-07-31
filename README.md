@@ -1,24 +1,40 @@
 # 🌀 Rick and Morty Explorer
 
-A PHP 8+ application that consumes the **Rick and Morty API** and displays characters in a responsive interface built with **Tailwind CSS**, without using any PHP frameworks.
+A **PHP 8+** application that consumes the **Rick and Morty API** and displays characters in a responsive interface built with **Tailwind CSS**, without using any PHP frameworks.
 
-## 📸 Preview
-
-> Add a screenshot of the application here after completing the project.
+The project follows a **component-based architecture**, uses **PSR-4 autoloading**, and includes features such as **search, filters, favorites, infinite scrolling, and responsive layouts**.
 
 ---
 
-## 🚀 Getting Started
+## 📸 Preview
 
-### Prerequisites
+### Desktop
 
-- PHP 8.0+
-- Composer
-- Node.js & npm
+![Desktop](screenshots/desktop.png)
 
-### Installation
+### Mobile
+
+![Mobile](screenshots/mobile.png)
+
+---
+
+# 🚀 Getting Started
+
+## Prerequisites
+
+* PHP 8.0+
+* Composer
+* Node.js & npm
+
+## 📦 Installation
+
+### Option 1 (Recommended) — XAMPP
+
+Clone the repository inside your XAMPP `htdocs` directory:
 
 ```bash
+cd C:\xampp\htdocs
+
 git clone https://github.com/jhoan2706/rick-and-morty-app.git
 cd rick-and-morty-app
 
@@ -27,62 +43,88 @@ npm install
 npm run build-css
 ```
 
-### Run the application
+Start **Apache** from the XAMPP Control Panel.
 
-Using PHP's built-in server:
+Then open:
+
+```text
+http://localhost/rick-and-morty-app/
+```
+
+---
+
+### Option 2 — PHP Built-in Server
+
+After installing the dependencies, run:
 
 ```bash
 php -S localhost:8000
 ```
 
-Or place the project inside your web server (e.g., XAMPP `htdocs`).
-
-Open:
+Then open:
 
 ```text
 http://localhost:8000
 ```
 
-> 💡 **Note:** During development, run `npm run watch-css` to automatically rebuild Tailwind CSS whenever changes are detected.
+# 🛠 Tech Stack
+
+* PHP 8+
+* Tailwind CSS 3
+* Vanilla JavaScript
+* Composer (PSR-4)
+* cURL
+* Rick and Morty REST API
 
 ---
 
-## 🛠️ Tech Stack
+# ✨ Features
 
-- **PHP 8+** — Server-side rendering and API consumption
-- **Tailwind CSS 3** — Utility-first CSS framework
-- **Composer (PSR-4 Autoloading)** — Namespace-based autoloading
-- **cURL** — HTTP requests to the Rick and Morty API
-- **Vanilla JavaScript** — Client-side interactions
-
----
-
-## ✨ Features
-
-- 🃏 Browse Rick and Morty characters
-- 🔍 Search by character name
-- 🎯 Filter by status, species, and gender
-- 📱 Fully responsive layout using CSS Grid and Flexbox
-- 📄 Server-side pagination with preserved filters
-- ❌ Graceful error handling and empty states
-- 🧩 Clean and reusable component-based architecture
+* 🃏 Browse Rick and Morty characters
+* 🔍 Search characters by name
+* 🎯 Filter by species and character type
+* ⭐ Favorite / unfavorite characters
+* 💾 Favorites persisted with LocalStorage
+* 🚀 Infinite scrolling
+* 📱 Responsive desktop and mobile layouts
+* 📄 Dedicated mobile detail page
+* ⚡ Smart cache for favorite characters
+* 🧩 Component-based architecture
+* ❌ Empty state handling
+* ⚠️ Error handling for failed API requests
 
 ---
 
-## 📁 Project Structure
+# 🎯 Bonus Features
+
+* ⭐ Favorites system with persistence
+* 🚀 Infinite Scroll
+* 💾 Cached favorite characters
+* 📱 Mobile detail page (`detail.php`)
+* 🎨 Pixel-perfect implementation based on the provided Figma design
+
+---
+
+# 📁 Project Structure
 
 ```text
 rick-and-morty-app/
 ├── index.php
+├── detail.php
+├── api/
+│   └── characters.php
 ├── config/
 │   └── config.php
 ├── src/
 │   ├── Components/
 │   │   ├── CharacterCard.php
-│   │   ├── Header.php
+│   │   ├── CharacterDetail.php
+│   │   ├── CharacterList.php
+│   │   ├── CharacterListItem.php
+│   │   ├── LoadingSpinner.php
 │   │   ├── Pagination.php
-│   │   ├── SearchFilters.php
-│   │   └── LoadingSpinner.php
+│   │   ├── SearchBar.php
+│   │   └── SearchFilters.php
 │   ├── Services/
 │   │   └── RickAndMortyAPI.php
 │   └── Utils/
@@ -101,60 +143,57 @@ rick-and-morty-app/
 
 ---
 
-## 📡 API Reference
+# 📡 API Reference
 
-This project consumes the public **Rick and Morty REST API**.
-
-**Base URL**
+Base URL
 
 ```text
 https://rickandmortyapi.com/api
 ```
 
-### Endpoints
+Endpoints used:
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/character` | Retrieve paginated characters |
-| GET | `/character?page={page}` | Retrieve a specific page |
-| GET | `/character?name={name}` | Search by name |
-| GET | `/character?status={status}` | Filter by status |
-| GET | `/character?species={species}` | Filter by species |
-| GET | `/character?gender={gender}` | Filter by gender |
+| Method | Endpoint                       | Description         |
+| ------ | ------------------------------ | ------------------- |
+| GET    | `/character`                   | Retrieve characters |
+| GET    | `/character?page={page}`       | Pagination          |
+| GET    | `/character?name={name}`       | Search              |
+| GET    | `/character?species={species}` | Filter by species   |
+| GET    | `/character?status={status}`   | Filter by status    |
+| GET    | `/character?gender={gender}`   | Filter by gender    |
 
-Supported query parameters:
+Documentation:
 
-- `page`
-- `name`
-- `status`
-- `species`
-- `gender`
-
-📚 Documentation: https://rickandmortyapi.com/documentation
+[https://rickandmortyapi.com/documentation](https://rickandmortyapi.com/documentation)
 
 ---
 
-## ✅ Technical Requirements
+# ✅ Technical Requirements
 
-- [x] PHP 8+ (no frameworks)
-- [x] Tailwind CSS
-- [x] Responsive layout
-- [x] Character cards
-- [x] REST API integration
-- [x] Server-side pagination
-- [x] Search by name
-- [x] Filters (status, species, gender)
-- [x] Clean and maintainable code
-- [x] PSR-4 autoloading
+* ✅ PHP 8+ (no framework)
+* ✅ Tailwind CSS
+* ✅ REST API integration
+* ✅ Responsive layout
+* ✅ Search functionality
+* ✅ Character filters
+* ✅ Infinite scrolling
+* ✅ Favorites system
+* ✅ LocalStorage persistence
+* ✅ Component-based architecture
+* ✅ PSR-4 autoloading
+* ✅ Error handling
+* ✅ Empty states
 
 ---
 
-## 👨‍💻 Author
+# 👨‍💻 Author
 
 **Gonzalo Gutierrez**
 
-- 📧 gonzalo2706@gmail.com
-- 🔗 https://github.com/jhoan2706
+📧 [gonzalo2706@gmail.com](mailto:gonzalo2706@gmail.com)
+
+GitHub:
+[https://github.com/jhoan2706](https://github.com/jhoan2706)
 
 ---
 
