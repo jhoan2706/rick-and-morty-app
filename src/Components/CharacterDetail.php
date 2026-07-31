@@ -10,14 +10,14 @@ class CharacterDetail
     {
         if (!$character) {
             return '
-            <main class="flex-1 bg-white flex items-center justify-center">
+            <div class="flex-1 bg-white flex items-center justify-center h-full w-full">
                 <div class="text-center">
                     <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
                     </svg>
                     <p class="text-gray-400 text-lg">Select a character to see details</p>
                 </div>
-            </main>';
+            </div>';
         }
         
         $name = Helpers::escape($character['name'] ?? 'Unknown');
@@ -36,7 +36,7 @@ class CharacterDetail
         ];
         $statusColor = $statusColors[$status] ?? 'text-gray-600 bg-gray-100';
         
-        $html = '<main class="flex-1 bg-white overflow-y-auto">';
+        $html = '<main class="flex-1 bg-white overflow-y-auto h-full">';
         $html .= '<div class="mx-auto max-w-[865px] px-[100px] pt-10">';
         
         $html .= '<div class="flex items-end">';

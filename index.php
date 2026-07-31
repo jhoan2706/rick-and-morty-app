@@ -68,8 +68,15 @@ if ($selectedId) {
                 border-right: 1px solid #f3f4f6 !important;
             }
             .detail-panel {
-                display: block !important;
+                display: flex !important;
+                flex: 1 !important;
+                height: 100vh !important;
             }
+        }
+        .detail-panel {
+            display: flex;
+            flex: 1;
+            height: 100vh;
         }
     </style>
 </head>
@@ -93,7 +100,7 @@ if ($selectedId) {
         <?php endif; ?>
     </aside>
 
-    <div class="detail-panel flex-1">
+    <div class="detail-panel">
         <?= CharacterDetail::render($selectedCharacter) ?>
     </div>
 
