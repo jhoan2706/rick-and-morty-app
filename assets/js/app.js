@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("🚀 App iniciada");
-
   // ==========================================
   // POPOVER - OPEN/CLOSE (MODIFICADO)
   // ==========================================
@@ -11,9 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function openPopup() {
     if (popup) {
       popup.classList.remove("hidden");
-      console.log("🔄 Popup: visible");
-
-      // Enfocar el input de búsqueda cuando se abre el popup
+      // Focus the search input when the popup opens
       if (searchInput) {
         searchInput.removeAttribute("readonly");
         setTimeout(function () {
@@ -26,9 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function closePopup() {
     if (popup) {
       popup.classList.add("hidden");
-      console.log("📦 Popup cerrado");
-
-      // Volver a poner readonly al input
+      // Put the search input back to readonly when the popup closes
       if (searchInput) {
         searchInput.setAttribute("readonly", true);
       }
@@ -47,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    // ABRIR POPUP AL HACER CLICK EN EL INPUT DE BÚSQUEDA
+    // Open popup when clicking on the search input
     if (searchInput) {
       searchInput.addEventListener("click", function (e) {
         e.preventDefault();
@@ -71,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ==========================================
-  // FILTERS - SELECT OPTIONS (CORREGIDO)
+  // FILTERS - SELECT OPTIONS (fixed)
   // ==========================================
   let selectedFilters = {
     character: "All",
@@ -79,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // ==========================================
-  // FILTER BUTTON - HABILITAR CON CAMBIOS (INCLUYE TEXTO DEL BUSCADOR)
+  // FILTER BUTTON - Fixed
   // ==========================================
   function checkFilterChanges() {
     const applyBtn = document.getElementById("apply-filters");
@@ -100,30 +94,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const currentSpeciesUI = currentSpecies || "All";
-    
-    // Obtener el texto actual del input de búsqueda
+
+    // Get the current value of the search input
     const searchInputValue = searchInput ? searchInput.value.trim() : "";
 
     const characterChanged = selectedFilters.character !== currentCharacter;
     const speciesChanged = selectedFilters.species !== currentSpeciesUI;
     const nameChanged = searchInputValue !== currentName;
-    
+
     const hasChanges = characterChanged || speciesChanged || nameChanged;
 
     if (hasChanges) {
       applyBtn.disabled = false;
       applyBtn.classList.remove("opacity-50", "cursor-not-allowed");
       applyBtn.classList.add("hover:bg-[#5B38B0]");
-      console.log("✅ Botón Filter habilitado (hay cambios)");
     } else {
       applyBtn.disabled = true;
       applyBtn.classList.add("opacity-50", "cursor-not-allowed");
       applyBtn.classList.remove("hover:bg-[#5B38B0]");
-      console.log("⛔ Botón Filter deshabilitado (sin cambios)");
     }
   }
 
-  // Función para actualizar el estado visual de los filtros
+  // Function to update the UI of filter buttons based on selectedFilters
   function updateFilterUI() {
     document
       .querySelectorAll('.filter-option[data-filter="character"]')
@@ -162,14 +154,12 @@ document.addEventListener("DOMContentLoaded", function () {
     checkFilterChanges();
   }
 
-  // Event listeners para los botones de filtro
+  // Event listeners for buttons to update selectedFilters and UI
   document.querySelectorAll(".filter-option").forEach(function (btn) {
     btn.addEventListener("click", function (e) {
       e.preventDefault();
       const filterType = this.dataset.filter;
       const value = this.dataset.value;
-
-      console.log("🎯 Click en filtro:", filterType, "=", value);
 
       if (filterType === "character") {
         selectedFilters.character = value;
@@ -178,19 +168,17 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       updateFilterUI();
-      console.log("📋 Filtros actuales:", selectedFilters);
     });
   });
 
-  // DETECTAR ESCRITURA EN EL INPUT DE BÚSQUEDA
+  // Detect changes in the search input to enable/disable the apply button
   if (searchInput) {
-    searchInput.addEventListener("input", function() {
+    searchInput.addEventListener("input", function () {
       checkFilterChanges();
-      console.log("📝 Texto buscador:", searchInput.value);
     });
   }
 
-  // Inicializar filtros desde URL
+  // Init filters from URL on page load
   (function initFiltersFromURL() {
     const params = new URLSearchParams(window.location.search);
     const status = params.get("status") || "";
@@ -216,13 +204,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (speciesInput) speciesInput.value = species;
 
     setTimeout(updateFilterUI, 50);
-    console.log("📋 Filtros inicializados:", selectedFilters);
   })();
 
   // ==========================================
-  // FAVORITES
+  // FAVORITES (OPTIMIZED WITH CACHE)
   // ==========================================
   var STORAGE_KEY = "rm-favorites";
+  var CACHE_KEY = "rm-favorites-cache";
 
   function getFavs() {
     try {
@@ -231,8 +219,26 @@ document.addEventListener("DOMContentLoaded", function () {
       return [];
     }
   }
+
   function saveFavs(ids) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+  }
+
+  // Cache of starred characters to avoid re-fetching from API
+  function getStarredCache() {
+    try {
+      return JSON.parse(localStorage.getItem(CACHE_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveStarredCache(cache) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    } catch (e) {
+      localStorage.removeItem(CACHE_KEY);
+    }
   }
 
   function initFavButtons() {
@@ -249,8 +255,15 @@ document.addEventListener("DOMContentLoaded", function () {
         var id = parseInt(this.dataset.id);
         var f = getFavs();
         var idx = f.indexOf(id);
-        if (idx > -1) f.splice(idx, 1);
-        else f.push(id);
+        if (idx > -1) {
+          f.splice(idx, 1);
+          // Delete from cache to avoid stale data
+          var cache = getStarredCache();
+          delete cache[id];
+          saveStarredCache(cache);
+        } else {
+          f.push(id);
+        }
         saveFavs(f);
         var active = f.indexOf(id) > -1;
 
@@ -281,6 +294,74 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Render the starred section from cache first, then update from API in background
+  function renderStarredFromCache() {
+    var favs = getFavs();
+    var starredSection = document.getElementById("starred-section");
+    var starredList = document.getElementById("starred-list");
+    var starredCount = document.getElementById("starred-count");
+
+    if (favs.length === 0) {
+      starredSection.style.display = "none";
+      starredList.innerHTML = "";
+      return;
+    }
+
+    var cache = getStarredCache();
+    var params = new URLSearchParams(window.location.search);
+    var selectedId = params.get("id") || "";
+    var html = "";
+    var cachedCount = 0;
+
+    favs.forEach(function (id) {
+      if (cache[id]) {
+        var c = cache[id];
+        var isActive = selectedId && parseInt(id) === parseInt(selectedId);
+        var bg = isActive ? "bg-primary-100" : "hover:bg-gray-50";
+        var encodedName = c.name.replace(/"/g, "&quot;");
+        var encodedSpecies = c.species.replace(/"/g, "&quot;");
+        var encodedImage = c.image.replace(/"/g, "&quot;");
+
+        html +=
+          '<div class="flex w-full items-center rounded-none border-t border-gray-200 px-5 py-4 ' +
+          bg +
+          ' transition-colors group">';
+        html +=
+          '<a href="?id=' + id + '" class="flex items-center flex-1 min-w-0">';
+        html +=
+          '<img src="' +
+          encodedImage +
+          '" alt="' +
+          encodedName +
+          '" class="h-8 w-8 rounded-full object-cover flex-shrink-0" loading="lazy" />';
+        html += '<div class="ml-4 flex-1 text-left min-w-0">';
+        html +=
+          '<p class="font-semibold text-gray-900 text-sm truncate">' +
+          encodedName +
+          "</p>";
+        html += '<p class="text-gray-500 text-sm">' + encodedSpecies + "</p>";
+        html += "</div></a>";
+        html +=
+          '<button class="favorite-btn flex-shrink-0 ml-2" data-id="' +
+          id +
+          '" aria-label="Toggle favorite">';
+        html +=
+          '<svg class="w-5 h-5 heart-icon text-secondary-600" fill="currentColor" stroke="none" viewBox="0 0 24 24">';
+        html +=
+          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>';
+        html += "</svg></button></div>";
+        cachedCount++;
+      }
+    });
+
+    if (cachedCount > 0) {
+      starredList.innerHTML = html;
+      starredCount.textContent = favs.length;
+      starredSection.style.display = "block";
+      initFavButtons();
+    }
+  }
+
   function rebuildStarredFromLocalStorage() {
     var favs = getFavs();
     var starredSection = document.getElementById("starred-section");
@@ -293,25 +374,117 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    fetch("api/characters.php?ids=" + favs.join(","))
+    // FIRST STEP: Render from cache immediately
+    renderStarredFromCache();
+
+    // SECOND STEP: update from API in background for any uncached IDs
+    var cache = getStarredCache();
+    var uncachedIds = favs.filter(function (id) {
+      return !cache[id];
+    });
+
+    // If all IDs are cached, just refresh the API for fresh data
+    if (uncachedIds.length === 0) {
+      var params = new URLSearchParams(window.location.search);
+      var selectedId = params.get("id") || "";
+      var url = "api/characters.php?ids=" + favs.join(",");
+      if (selectedId) url += "&selected_id=" + selectedId;
+
+      fetch(url)
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (data.html) {
+            starredList.innerHTML = data.html;
+            starredCount.textContent = favs.length;
+            starredSection.style.display = "block";
+            initFavButtons();
+          }
+        });
+      return;
+    }
+
+    // There are uncached IDs, fetch from API
+    var params = new URLSearchParams(window.location.search);
+    var selectedId = params.get("id") || "";
+    var url = "api/characters.php?ids=" + favs.join(",");
+    if (selectedId) url += "&selected_id=" + selectedId;
+
+    fetch(url)
       .then(function (r) {
         return r.json();
       })
       .then(function (data) {
         if (data.html) {
+          // Save data to cache for all IDs, even if some were already cached
           starredList.innerHTML = data.html;
           starredCount.textContent = favs.length;
           starredSection.style.display = "block";
           initFavButtons();
+
+          // Update cache for all IDs, not just uncached ones, to ensure freshness
+          updateCacheForIds(uncachedIds);
         }
       });
+  }
+
+  // Update the cache for a list of IDs by fetching their data from the API
+  function updateCacheForIds(ids) {
+    if (ids.length === 0) return;
+
+    var cache = getStarredCache();
+    var batchSize = 5;
+    var index = 0;
+
+    function processBatch() {
+      var batch = ids.slice(index, index + batchSize);
+      if (batch.length === 0) {
+        saveStarredCache(cache);
+        return;
+      }
+
+      var url = "api/characters.php?ids=" + batch.join(",");
+      fetch(url)
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          var tempDiv = document.createElement("div");
+          tempDiv.innerHTML = data.html || "";
+          var items = tempDiv.querySelectorAll(".favorite-btn");
+          items.forEach(function (btn) {
+            var id = parseInt(btn.dataset.id);
+            var img = btn.parentElement.querySelector("img");
+            var nameEl = btn.parentElement.querySelector("p.font-semibold");
+            var speciesEl =
+              btn.parentElement.querySelectorAll("p.text-gray-500")[0];
+            if (id && img && nameEl && speciesEl) {
+              cache[id] = {
+                name: nameEl.textContent.trim(),
+                species: speciesEl.textContent.trim(),
+                image: img.src,
+              };
+            }
+          });
+
+          index += batchSize;
+          if (index < ids.length) {
+            setTimeout(processBatch, 200);
+          } else {
+            saveStarredCache(cache);
+          }
+        });
+    }
+
+    processBatch();
   }
 
   initFavButtons();
   rebuildStarredFromLocalStorage();
 
   // ==========================================
-  // INFINITE SCROLL (CON RETRY Y DELAY)
+  // INFINITE SCROLL (WITH RETRY AND DELAY)
   // ==========================================
   var list = document.getElementById("characters-list");
   if (!list) return;
@@ -325,10 +498,9 @@ document.addEventListener("DOMContentLoaded", function () {
   function loadMore() {
     if (loading || done) return;
 
-    // Si estamos reintentando, esperar más tiempo
+    // If we have retried, apply a delay before the next attempt
     if (retryCount > 0) {
-      var delay = retryCount * 1000; // 1seg, 2seg, 3seg
-      console.log("⏳ Reintentando en " + delay + "ms...");
+      var delay = retryCount * 1000; // 1sec, 2sec, 3sec
       setTimeout(function () {
         loading = false;
         loadMore();
@@ -351,15 +523,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (species) url += "&species=" + encodeURIComponent(species);
     if (selectedId) url += "&selected_id=" + selectedId;
 
-    // Si el filtro es "starred", pasar los IDs de favoritos
+    // If the filter is "starred" or "others", we need to pass the IDs of the favorites to the API
     if (status === "starred" || status === "others") {
       var favs = getFavs();
       if (favs.length > 0) {
         url += "&starred_ids=" + favs.join(",");
       }
     }
-
-    console.log("📥 Cargando página " + page + ":", url);
 
     fetch(url)
       .then(function (r) {
@@ -373,7 +543,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(function (data) {
         loading = false;
-        retryCount = 0; // Resetear contador de reintentos
+        retryCount = 0; // Reset counter on success
 
         if (data.html && data.count > 0) {
           var div = document.createElement("div");
@@ -383,14 +553,11 @@ document.addEventListener("DOMContentLoaded", function () {
           var countEl = document.getElementById("characters-count");
           if (countEl)
             countEl.textContent = parseInt(countEl.textContent) + data.count;
-          console.log(
-            "✅ Página " + page + " cargada: " + data.count + " personajes",
-          );
         }
 
         if (!data.hasMore) {
           done = true;
-          console.log("🏁 No hay más personajes");
+          console.log("🏁 No more characters");
         }
       })
       .catch(function (error) {
@@ -398,23 +565,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (error.message === "RATE_LIMIT") {
           retryCount++;
-          page--; // Revertir página
+          page--;
 
           if (retryCount <= maxRetries) {
             console.warn(
-              "⚠️ Rate limit alcanzado. Intento " +
+              "⚠️ Rate limit reached. Try " +
                 retryCount +
-                " de " +
+                " of " +
                 maxRetries,
             );
-            loadMore(); // Esto activará el delay
+            loadMore(); 
           } else {
-            console.error("❌ Máximo de reintentos alcanzado");
+            console.error("❌ Max retries reached. Stopping further attempts.");
             page++; // Restaurar página
             retryCount = 0;
           }
         } else {
-          console.error("❌ Error cargando:", error);
+          console.error("❌ Error loading characters:", error);
           page--;
           retryCount = 0;
         }
@@ -422,20 +589,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ==========================================
-  // FUNCIÓN PARA RECARGAR PERSONAJES (FILTROS)
+  // Function to reload characters with current filters (used after applying filters)
   // ==========================================
   function reloadCharacters() {
     var list = document.getElementById("characters-list");
     if (!list) return;
 
-    // Resetear estado del infinite scroll
+    // Reset pagination and state
     page = 1;
     done = false;
     loading = false;
     retryCount = 0;
     list.innerHTML = "";
 
-    // Cargar primera página con filtros actuales
+    // Load the first page with current filters
     var params = new URLSearchParams(window.location.search);
     var name = params.get("name") || "";
     var status = params.get("status") || "";
@@ -448,15 +615,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (species) url += "&species=" + encodeURIComponent(species);
     if (selectedId) url += "&selected_id=" + selectedId;
 
-    // ¡AGREGAR ESTO! Pasar IDs de favoritos cuando sea necesario
+    // Pass IDs of favorites to the API if the filter is "starred" or "others"
     if (status === "starred" || status === "others") {
       var favs = getFavs();
       if (favs.length > 0) {
         url += "&starred_ids=" + favs.join(",");
       }
     }
-
-    console.log("🔄 Recargando personajes:", url);
 
     fetch(url)
       .then(function (r) {
@@ -470,7 +635,6 @@ document.addEventListener("DOMContentLoaded", function () {
           if (countEl) countEl.textContent = data.count || 0;
           if (!data.hasMore) done = true;
           initFavButtons();
-          console.log("✅ Personajes recargados:", data.count);
         }
       })
       .catch(function (error) {
@@ -478,7 +642,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // Agregar throttle al scroll para no disparar muchas peticiones
+  // Add scroll event listener with debounce to load more characters when near the bottom
   var scrollTimeout;
   list.addEventListener("scroll", function () {
     clearTimeout(scrollTimeout);
@@ -486,7 +650,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (list.scrollTop + list.clientHeight >= list.scrollHeight - 200) {
         loadMore();
       }
-    }, 300); // Esperar 300ms después del último scroll
+    }, 300);
   });
 
   setTimeout(function () {
@@ -494,14 +658,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }, 1000); // Aumentado a 1 segundo
 
   // ==========================================
-  // APPLY FILTERS (SIN RECARGAR PÁGINA)
+  // APPLY FILTERS (NO RELOAD, UPDATE URL)
   // ==========================================
   document
     .getElementById("apply-filters")
     ?.addEventListener("click", function () {
-      console.log("🔍 Aplicando filtros...", selectedFilters);
-
-      // Deshabilitar el botón inmediatamente
+      // Disable the button to prevent multiple clicks
       this.disabled = true;
       this.classList.add("opacity-50", "cursor-not-allowed");
       this.classList.remove("hover:bg-[#5B38B0]");
@@ -525,7 +687,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (statusInput) statusInput.value = statusValue;
       if (speciesInput) speciesInput.value = speciesValue;
 
-      // Actualizar URL sin recargar la página
+      // Update url without reloading the page
       const params = new URLSearchParams();
 
       const nameInput = searchForm
@@ -542,14 +704,10 @@ document.addEventListener("DOMContentLoaded", function () {
         ? "?" + params.toString()
         : window.location.pathname;
       window.history.pushState({}, "", newUrl);
-      console.log("🔗 URL actualizada:", newUrl);
 
-      // Recargar lista de personajes con los nuevos filtros
+      // Reload characters with the new filters
       reloadCharacters();
-
-      // Cerrar popup
+      
       if (popup) popup.classList.add("hidden");
     });
-
-  console.log("✅ Ready");
 });

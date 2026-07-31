@@ -12,12 +12,16 @@ $ids = $_GET['ids'] ?? null;
 if ($ids) {
     $api = new RickAndMortyAPI();
     $idArray = array_filter(explode(',', $ids));
+    
+    // Get the selected_id from GET parameters
+    $selectedId = isset($_GET['selected_id']) ? (int)$_GET['selected_id'] : null;
+    
     $html = '';
     foreach ($idArray as $id) {
         try {
             $c = $api->getCharacterById((int)$id);
-            // Para la sección starred, nunca hay selección activa
-            $html .= App\Components\CharacterListItem::render($c, false, true);
+            $isActive = ($selectedId && (int)$id === $selectedId);
+            $html .= App\Components\CharacterListItem::render($c, $isActive, true);
         } catch (\Exception $e) {}
     }
     echo json_encode(['html' => $html, 'count' => count($idArray)]);
@@ -33,14 +37,14 @@ $species = $_GET['species'] ?? null;
 $api = new RickAndMortyAPI();
 
 try {
-    // Si el filtro es "starred" u "others", filtrar localmente
+    // If the filter is "starred" or "others", we need to handle it differently
     if ($status === 'starred' || $status === 'others') {
-        // Obtener starred IDs desde un parámetro o cookie
+        // Get starred IDs from cookie or GET parameter
         $starredIds = [];
         if (isset($_COOKIE['starred'])) {
             $starredIds = json_decode($_COOKIE['starred'], true) ?? [];
         }
-        // También aceptar starred_ids por GET
+        // Also check if starred_ids are passed via GET (for infinite scroll)
         if (isset($_GET['starred_ids'])) {
             $starredIds = explode(',', $_GET['starred_ids']);
         }
@@ -49,7 +53,6 @@ try {
         $pageSize = 20;
         
         if ($status === 'starred') {
-            // Mostrar solo favoritos
             if (empty($starredIds)) {
                 echo json_encode([
                     'html' => '<p class="px-6 py-4 text-sm text-gray-400">No starred characters yet</p>',
@@ -59,13 +62,12 @@ try {
                 exit;
             }
             
-            // Obtener TODOS los personajes starred primero
+            // Get all starred characters and filter them by name and species
             $allStarredCharacters = [];
             foreach ($starredIds as $id) {
                 try {
                     $c = $api->getCharacterById((int)$id);
                     
-                    // CORREGIDO: Filtrar por especie y nombre
                     $matchesSpecies = !$species || $species === 'All' || 
                         (isset($c['species']) && strtolower($c['species']) === strtolower($species));
                     $matchesName = !$name || 
@@ -77,7 +79,7 @@ try {
                 } catch (\Exception $e) {}
             }
             
-            // Paginar los resultados filtrados
+            // Paginate the filtered starred characters
             $totalFiltered = count($allStarredCharacters);
             $offset = ($page - 1) * $pageSize;
             $pagedCharacters = array_slice($allStarredCharacters, $offset, $pageSize);
@@ -98,7 +100,7 @@ try {
             exit;
             
         } elseif ($status === 'others') {
-            // Mostrar no favoritos (requiere cargar todos y filtrar)
+            // Show non-starred characters, filtered by name and species
             $apiFilters = ['name' => $name];
             if ($species && $species !== 'All') {
                 $apiFilters['species'] = $species;
@@ -121,7 +123,7 @@ try {
         }
     }
     
-    // Filtros normales (All, Human, Alien, etc.)
+    // Rgular API call for all characters with filters
     $apiFilters = ['name' => $name];
     if ($species && $species !== 'All') {
         $apiFilters['species'] = $species;
