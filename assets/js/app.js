@@ -55,7 +55,6 @@ document.addEventListener("DOMContentLoaded", function () {
     toggleBtn.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
-
       if (popup.classList.contains("hidden")) {
         openPopup();
       } else {
@@ -94,9 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
     species: "All",
   };
 
-  // ==========================================
-  // FILTER BUTTON - Fixed
-  // ==========================================
   function checkFilterChanges() {
     const applyBtn = document.getElementById("apply-filters");
     if (!applyBtn) return;
@@ -111,8 +107,6 @@ document.addEventListener("DOMContentLoaded", function () {
       currentCharacter = "Starred";
     } else if (currentStatus === "others") {
       currentCharacter = "Others";
-    } else if (currentStatus === "") {
-      currentCharacter = "All";
     }
 
     const currentSpeciesUI = currentSpecies || "All";
@@ -120,11 +114,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // Get the current value of the search input
     const searchInputValue = searchInput ? searchInput.value.trim() : "";
 
-    const characterChanged = selectedFilters.character !== currentCharacter;
-    const speciesChanged = selectedFilters.species !== currentSpeciesUI;
-    const nameChanged = searchInputValue !== currentName;
-
-    const hasChanges = characterChanged || speciesChanged || nameChanged;
+    const hasChanges =
+      selectedFilters.character !== currentCharacter ||
+      selectedFilters.species !== currentSpeciesUI ||
+      searchInputValue !== currentName;
 
     if (hasChanges) {
       applyBtn.disabled = false;
@@ -229,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
   })();
 
   // ==========================================
-  // FAVORITES (OPTIMIZED WITH CACHE)
+  // FAVORITES (OPTIMIZED)
   // ==========================================
   var STORAGE_KEY = "rm-favorites";
   var CACHE_KEY = "rm-favorites-cache";
@@ -323,6 +316,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var starredList = document.getElementById("starred-list");
     var starredCount = document.getElementById("starred-count");
 
+    if (!starredSection || !starredList || !starredCount) return;
+
     if (favs.length === 0) {
       starredSection.style.display = "none";
       starredList.innerHTML = "";
@@ -334,6 +329,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var selectedId = params.get("id") || "";
     var html = "";
     var cachedCount = 0;
+    var missingIds = [];
 
     favs.forEach(function (id) {
       if (cache[id]) {
@@ -347,40 +343,81 @@ document.addEventListener("DOMContentLoaded", function () {
         html +=
           '<div class="flex w-full items-center rounded-none border-t border-gray-200 px-5 py-4 ' +
           bg +
-          ' transition-colors group">';
-        html +=
-          '<a href="?id=' + id + '" class="flex items-center flex-1 min-w-0">';
-        html +=
+          ' transition-colors group">' +
+          '<a href="?id=' +
+          id +
+          '" class="flex items-center flex-1 min-w-0 character-link" data-id="' +
+          id +
+          '">' +
           '<img src="' +
           encodedImage +
           '" alt="' +
           encodedName +
-          '" class="h-8 w-8 rounded-full object-cover flex-shrink-0" loading="lazy" />';
-        html += '<div class="ml-4 flex-1 text-left min-w-0">';
-        html +=
+          '" class="h-8 w-8 rounded-full object-cover flex-shrink-0" loading="lazy" />' +
+          '<div class="ml-4 flex-1 text-left min-w-0">' +
           '<p class="font-semibold text-gray-900 text-sm truncate">' +
           encodedName +
-          "</p>";
-        html += '<p class="text-gray-500 text-sm">' + encodedSpecies + "</p>";
-        html += "</div></a>";
-        html +=
+          "</p>" +
+          '<p class="text-gray-500 text-sm">' +
+          encodedSpecies +
+          "</p>" +
+          "</div></a>" +
           '<button class="favorite-btn flex-shrink-0 ml-2" data-id="' +
           id +
-          '" aria-label="Toggle favorite">';
-        html +=
-          '<svg class="w-5 h-5 heart-icon text-secondary-600" fill="currentColor" stroke="none" viewBox="0 0 24 24">';
-        html +=
-          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>';
-        html += "</svg></button></div>";
+          '" aria-label="Toggle favorite">' +
+          '<svg class="w-5 h-5 heart-icon text-secondary-600" fill="currentColor" stroke="none" viewBox="0 0 24 24">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>' +
+          "</svg></button></div>";
         cachedCount++;
+      } else {
+        missingIds.push(id);
       }
     });
+
+    // If there are missing IDs, fetch them from the API and update the cache
+    if (missingIds.length > 0) {
+      var url = "api/characters.php?ids=" + missingIds.join(",");
+      fetch(url)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data.html) {
+            // Update the cache with the newly fetched data
+            var tempDiv = document.createElement("div");
+            tempDiv.innerHTML = data.html;
+            var items = tempDiv.querySelectorAll(".favorite-btn");
+            items.forEach(function (btn) {
+              var id = parseInt(btn.dataset.id);
+              var img = btn.parentElement.querySelector("img");
+              var nameEl = btn.parentElement.querySelector("p.font-semibold");
+              var speciesEl = btn.parentElement.querySelectorAll("p.text-gray-500")[0];
+              if (id && img && nameEl && speciesEl) {
+                var cache = getStarredCache();
+                cache[id] = {
+                  name: nameEl.textContent.trim(),
+                  species: speciesEl.textContent.trim(),
+                  image: img.src,
+                };
+                saveStarredCache(cache);
+              }
+            });
+            // Re-render the starred section from cache after updating it
+            renderStarredFromCache();
+          }
+        });
+      return;
+    }
 
     if (cachedCount > 0) {
       starredList.innerHTML = html;
       starredCount.textContent = favs.length;
       starredSection.style.display = "block";
       initFavButtons();
+      initMobileLinks();
+    } else {
+      // If there are no cached items, show a loading message while fetching from the API
+      starredList.innerHTML = '<p class="px-6 py-4 text-sm text-gray-400">Loading starred characters...</p>';
+      starredCount.textContent = favs.length;
+      starredSection.style.display = "block";
     }
   }
 
@@ -390,126 +427,26 @@ document.addEventListener("DOMContentLoaded", function () {
     var starredList = document.getElementById("starred-list");
     var starredCount = document.getElementById("starred-count");
 
+    if (!starredSection || !starredList || !starredCount) return;
+
     if (favs.length === 0) {
       starredSection.style.display = "none";
       starredList.innerHTML = "";
       return;
     }
 
-    // FIRST STEP: Render from cache immediately
     renderStarredFromCache();
-
-    // SECOND STEP: update from API in background for any uncached IDs
-    var cache = getStarredCache();
-    var uncachedIds = favs.filter(function (id) {
-      return !cache[id];
-    });
-
-    // If all IDs are cached, just refresh the API for fresh data
-    if (uncachedIds.length === 0) {
-      var params = new URLSearchParams(window.location.search);
-      var selectedId = params.get("id") || "";
-      var url = "api/characters.php?ids=" + favs.join(",");
-      if (selectedId) url += "&selected_id=" + selectedId;
-
-      fetch(url)
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (data) {
-          if (data.html) {
-            starredList.innerHTML = data.html;
-            starredCount.textContent = favs.length;
-            starredSection.style.display = "block";
-            initFavButtons();
-          }
-        });
-      return;
-    }
-
-    // There are uncached IDs, fetch from API
-    var params = new URLSearchParams(window.location.search);
-    var selectedId = params.get("id") || "";
-    var url = "api/characters.php?ids=" + favs.join(",");
-    if (selectedId) url += "&selected_id=" + selectedId;
-
-    fetch(url)
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (data) {
-        if (data.html) {
-          // Save data to cache for all IDs, even if some were already cached
-          starredList.innerHTML = data.html;
-          starredCount.textContent = favs.length;
-          starredSection.style.display = "block";
-          initFavButtons();
-
-          // Update cache for all IDs, not just uncached ones, to ensure freshness
-          updateCacheForIds(uncachedIds);
-        }
-      });
-  }
-
-  // Update the cache for a list of IDs by fetching their data from the API
-  function updateCacheForIds(ids) {
-    if (ids.length === 0) return;
-
-    var cache = getStarredCache();
-    var batchSize = 5;
-    var index = 0;
-
-    function processBatch() {
-      var batch = ids.slice(index, index + batchSize);
-      if (batch.length === 0) {
-        saveStarredCache(cache);
-        return;
-      }
-
-      var url = "api/characters.php?ids=" + batch.join(",");
-      fetch(url)
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (data) {
-          var tempDiv = document.createElement("div");
-          tempDiv.innerHTML = data.html || "";
-          var items = tempDiv.querySelectorAll(".favorite-btn");
-          items.forEach(function (btn) {
-            var id = parseInt(btn.dataset.id);
-            var img = btn.parentElement.querySelector("img");
-            var nameEl = btn.parentElement.querySelector("p.font-semibold");
-            var speciesEl =
-              btn.parentElement.querySelectorAll("p.text-gray-500")[0];
-            if (id && img && nameEl && speciesEl) {
-              cache[id] = {
-                name: nameEl.textContent.trim(),
-                species: speciesEl.textContent.trim(),
-                image: img.src,
-              };
-            }
-          });
-
-          index += batchSize;
-          if (index < ids.length) {
-            setTimeout(processBatch, 200);
-          } else {
-            saveStarredCache(cache);
-          }
-        });
-    }
-
-    processBatch();
+    // Make sure to initialize mobile links after a short delay to ensure the DOM is updated
+    setTimeout(initMobileLinks, 100);
   }
 
   initFavButtons();
-  // Only execute rebuildStarredFromLocalStorage if the starred section exists on the page
-  if (document.getElementById('starred-section')) {
+  if (document.getElementById("starred-section")) {
     rebuildStarredFromLocalStorage();
   }
 
   // ==========================================
-  // INFINITE SCROLL (WITH RETRY AND DELAY)
+  // INFINITE SCROLL
   // ==========================================
   var list = document.getElementById("characters-list");
   if (!list) return;
@@ -537,7 +474,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // If we have retried, apply a delay before the next attempt
     if (retryCount > 0) {
-      var delay = retryCount * 1000; // 1sec, 2sec, 3sec
+      var delay = retryCount * 1000;
       setTimeout(function () {
         loading = false;
         loadMore();
@@ -595,53 +532,43 @@ document.addEventListener("DOMContentLoaded", function () {
           var newTotal = currentTotal + data.count;
           updateCharacterCounts(newTotal);
           updateFiltersBadge();
+          
+          // Init mobile links for newly loaded items
+          initMobileLinks();
         }
 
         if (!data.hasMore) {
           done = true;
-          console.log("🏁 No more characters");
         }
       })
       .catch(function (error) {
         loading = false;
-
         if (error.message === "RATE_LIMIT") {
           retryCount++;
           page--;
-
           if (retryCount <= maxRetries) {
-            console.warn(
-              "⚠️ Rate limit reached. Try " + retryCount + " of " + maxRetries,
-            );
             loadMore();
           } else {
-            console.error("❌ Max retries reached. Stopping further attempts.");
-            page++; // Increment page back to avoid skipping
+            page++;
             retryCount = 0;
           }
         } else {
-          console.error("❌ Error loading characters:", error);
           page--;
           retryCount = 0;
         }
       });
   }
 
-  // ==========================================
-  // Function to reload characters with current filters (used after applying filters)
-  // ==========================================
   function reloadCharacters() {
     var list = document.getElementById("characters-list");
     if (!list) return;
 
-    // Reset pagination and state
     page = 1;
     done = false;
     loading = false;
     retryCount = 0;
     list.innerHTML = "";
 
-    // Load the first page with current filters
     var params = new URLSearchParams(window.location.search);
     var name = params.get("name") || "";
     var status = params.get("status") || "";
@@ -654,7 +581,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (species) url += "&species=" + encodeURIComponent(species);
     if (selectedId) url += "&selected_id=" + selectedId;
 
-    // Pass IDs of favorites to the API if the filter is "starred" or "others"
     if (status === "starred" || status === "others") {
       var favs = getFavs();
       if (favs.length > 0) {
@@ -674,14 +600,14 @@ document.addEventListener("DOMContentLoaded", function () {
           updateFiltersBadge();
           if (!data.hasMore) done = true;
           initFavButtons();
+          initMobileLinks();
         }
       })
       .catch(function (error) {
-        console.error("❌ Error reloading characters:", error);
+        console.error("Error reloading characters:", error);
       });
   }
 
-  // Add scroll event listener with debounce to load more characters when near the bottom
   var scrollTimeout;
   list.addEventListener("scroll", function () {
     clearTimeout(scrollTimeout);
@@ -696,18 +622,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (list.scrollHeight <= list.clientHeight + 100) loadMore();
   }, 1000);
 
-  // Init the filters badge on page load
   setTimeout(function () {
     updateFiltersBadge();
   }, 100);
 
   // ==========================================
-  // APPLY FILTERS (NO RELOAD, UPDATE URL)
+  // APPLY FILTERS
   // ==========================================
   document
     .getElementById("apply-filters")
     ?.addEventListener("click", function () {
-      // Disable the button to prevent multiple clicks
       this.disabled = true;
       this.classList.add("opacity-50", "cursor-not-allowed");
       this.classList.remove("hover:bg-[#5B38B0]");
@@ -731,7 +655,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (statusInput) statusInput.value = statusValue;
       if (speciesInput) speciesInput.value = speciesValue;
 
-      // Update url without reloading the page
       const params = new URLSearchParams();
 
       const nameInput = searchForm
@@ -749,14 +672,13 @@ document.addEventListener("DOMContentLoaded", function () {
         : window.location.pathname;
       window.history.pushState({}, "", newUrl);
 
-      // Reload characters with the new filters
       reloadCharacters();
 
       if (popup) popup.classList.add("hidden");
     });
 
   // ==========================================
-  // MOBILE REDIRECT - Redirect to detail page on mobile when clicking a character
+  // MOBILE REDIRECT
   // ==========================================
   function isMobile() {
     return window.innerWidth < 768;
@@ -768,31 +690,25 @@ document.addEventListener("DOMContentLoaded", function () {
       link.dataset.mobileInit = "1";
 
       link.addEventListener("click", function (e) {
-        // Only redirect if the screen width is less than 768px (mobile)
         if (isMobile()) {
           e.preventDefault();
+          e.stopPropagation();
           var id = this.dataset.id;
           if (id) {
             window.location.href = "detail.php?id=" + id;
           }
+          return false;
         }
       });
     });
   }
 
-  // Init mobile links on page load and after loading more characters
   initMobileLinks();
 
-  // This is to ensure that the mobile links are re-initialized after the favorite buttons and load more functionality are executed, as they may add new character items to the DOM.
-  var originalInitFav6 = initFavButtons;
-  initFavButtons = function () {
-    originalInitFav6();
-    initMobileLinks();
-  };
-
-  var originalLoadMore6 = loadMore;
+  // Only override loadMore if it exists, to ensure we don't break existing functionality
+  var originalLoadMore = loadMore;
   loadMore = function () {
-    originalLoadMore6();
-    setTimeout(initMobileLinks, 100);
+    originalLoadMore();
+    // initMobileLinks is already called after new items are loaded, so we don't need to call it here again
   };
 });

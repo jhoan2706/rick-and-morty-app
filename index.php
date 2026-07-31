@@ -16,6 +16,7 @@ $filters = [
     'species' => $_GET['species'] ?? null,
     'gender' => $_GET['gender'] ?? null,
 ];
+
 $selectedId = isset($_GET['id']) ? (int)$_GET['id'] : null;
 $starredIds = isset($_COOKIE['starred']) ? json_decode($_COOKIE['starred'], true) : [];
 
@@ -60,8 +61,15 @@ if ($selectedId) {
             .detail-panel {
                 display: none !important;
             }
+            /* Hide the active character highlight in mobile */
+            .character-item.bg-primary-100 {
+                background-color: transparent !important;
+            }
+            .character-item.bg-primary-100:hover {
+                background-color: #f9fafb !important;
+            }
         }
-        /* En desktop, el aside tiene 375px y el detail se muestra */
+        /* On desktop, the aside takes a fixed width */
         @media (min-width: 768px) {
             .aside-main {
                 width: 375px !important;

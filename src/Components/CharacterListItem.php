@@ -14,7 +14,7 @@ class CharacterListItem
         $id = (int)($character['id'] ?? 0);
         $bg = $isActive ? 'bg-primary-100' : 'hover:bg-gray-50';
         
-        // Build the query string for the character link, preserving existing GET parameters and adding the character ID
+        // Build the query string for the character link
         $currentParams = $_GET;
         $currentParams['id'] = $id;
         $queryString = http_build_query($currentParams);
