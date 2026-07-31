@@ -31,93 +31,106 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ==========================================
-  // FILTERS - SELECT OPTIONS
+  // FILTERS - SELECT OPTIONS (CORREGIDO)
   // ==========================================
   let selectedFilters = {
     character: "All",
     species: "All",
   };
 
+  // ==========================================
+  // FILTER BUTTON - HABILITAR SOLO CON CAMBIOS
+  // ==========================================
+  function checkFilterChanges() {
+    const applyBtn = document.getElementById('apply-filters');
+    if (!applyBtn) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const currentStatus = params.get('status') || '';
+    const currentSpecies = params.get('species') || '';
+    
+    let currentCharacter = 'All';
+    if (currentStatus === 'starred') {
+      currentCharacter = 'Starred';
+    } else if (currentStatus === 'others') {
+      currentCharacter = 'Others';
+    }
+    
+    const currentSpeciesUI = currentSpecies || 'All';
+    
+    const characterChanged = selectedFilters.character !== currentCharacter;
+    const speciesChanged = selectedFilters.species !== currentSpeciesUI;
+    const hasChanges = characterChanged || speciesChanged;
+    
+    if (hasChanges) {
+      applyBtn.disabled = false;
+      applyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      applyBtn.classList.add('hover:bg-[#5B38B0]');
+      console.log('✅ Botón Filter habilitado (hay cambios)');
+    } else {
+      applyBtn.disabled = true;
+      applyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      applyBtn.classList.remove('hover:bg-[#5B38B0]');
+      console.log('⛔ Botón Filter deshabilitado (sin cambios)');
+    }
+  }
+
+  // Función para actualizar el estado visual de los filtros
+  function updateFilterUI() {
+    document.querySelectorAll('.filter-option[data-filter="character"]').forEach(function(btn) {
+      const value = btn.dataset.value;
+      if (value === selectedFilters.character) {
+        btn.className = btn.className
+          .replace(/border-\[\#E8E8E8\]/g, 'border-[#6B46C1]')
+          .replace(/bg-white/g, 'bg-[#EEE3FF]')
+          .replace(/text-\[\#1E1E1E\]/g, 'text-[#6B46C1]');
+      } else {
+        btn.className = btn.className
+          .replace(/border-\[\#6B46C1\]/g, 'border-[#E8E8E8]')
+          .replace(/bg-\[\#EEE3FF\]/g, 'bg-white')
+          .replace(/text-\[\#6B46C1\]/g, 'text-[#1E1E1E]');
+      }
+    });
+
+    document.querySelectorAll('.filter-option[data-filter="species"]').forEach(function(btn) {
+      const value = btn.dataset.value;
+      if (value === selectedFilters.species) {
+        btn.className = btn.className
+          .replace(/border-\[\#E8E8E8\]/g, 'border-[#6B46C1]')
+          .replace(/bg-white/g, 'bg-[#EEE3FF]')
+          .replace(/text-\[\#1E1E1E\]/g, 'text-[#6B46C1]');
+      } else {
+        btn.className = btn.className
+          .replace(/border-\[\#6B46C1\]/g, 'border-[#E8E8E8]')
+          .replace(/bg-\[\#EEE3FF\]/g, 'bg-white')
+          .replace(/text-\[\#6B46C1\]/g, 'text-[#1E1E1E]');
+      }
+    });
+    
+    checkFilterChanges();
+  }
+
+  // Event listeners para los botones de filtro
   document.querySelectorAll(".filter-option").forEach(function (btn) {
-    btn.addEventListener("click", function () {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
       const filterType = this.dataset.filter;
       const value = this.dataset.value;
 
-      document
-        .querySelectorAll(`.filter-option[data-filter="${filterType}"]`)
-        .forEach(function (b) {
-          b.classList.remove(
-            "border-[#6B46C1]",
-            "bg-[#EEE3FF]",
-            "text-[#6B46C1]",
-          );
-          b.classList.add("border-[#E8E8E8]", "bg-white", "text-[#1E1E1E]");
-        });
+      console.log("🎯 Click en filtro:", filterType, "=", value);
 
-      this.classList.remove("border-[#E8E8E8]", "bg-white", "text-[#1E1E1E]");
-      this.classList.add("border-[#6B46C1]", "bg-[#EEE3FF]", "text-[#6B46C1]");
+      if (filterType === "character") {
+        selectedFilters.character = value;
+      } else if (filterType === "species") {
+        selectedFilters.species = value;
+      }
 
-      selectedFilters[filterType] = value;
-      console.log("🎯 Filtro:", filterType, "=", value);
+      updateFilterUI();
+      console.log("📋 Filtros actuales:", selectedFilters);
     });
   });
 
-  // ==========================================
-  // APPLY FILTERS BUTTON
-  // ==========================================
-  document
-    .getElementById("apply-filters")
-    ?.addEventListener("click", function () {
-      console.log("🔍 Aplicando filtros...", selectedFilters);
-
-      const statusInput = document.getElementById("filter-status-hidden");
-      const speciesInput = document.getElementById("filter-species-hidden");
-      const searchForm = document.getElementById("search-form");
-
-      let statusValue = "";
-      if (selectedFilters.character === "Starred") {
-        statusValue = "starred";
-      } else if (selectedFilters.character === "Others") {
-        statusValue = "others";
-      }
-
-      let speciesValue = "";
-      if (selectedFilters.species !== "All") {
-        speciesValue = selectedFilters.species;
-      }
-
-      if (statusInput) statusInput.value = statusValue;
-      if (speciesInput) speciesInput.value = speciesValue;
-
-      if (searchForm) {
-        const params = new URLSearchParams(window.location.search);
-        if (statusValue) {
-          params.set("status", statusValue);
-        } else {
-          params.delete("status");
-        }
-        if (speciesValue) {
-          params.set("species", speciesValue);
-        } else {
-          params.delete("species");
-        }
-
-        const nameInput = searchForm.querySelector('input[name="name"]');
-        if (nameInput && nameInput.value) {
-          params.set("name", nameInput.value);
-        } else {
-          params.delete("name");
-        }
-
-        window.location.href = "?" + params.toString();
-      }
-
-      if (popup) popup.classList.add("hidden");
-    });
-
-  // ==========================================
-  // INIT FILTERS FROM URL
-  // ==========================================
+  // Inicializar filtros desde URL
   (function initFiltersFromURL() {
     const params = new URLSearchParams(window.location.search);
     const status = params.get("status") || "";
@@ -131,14 +144,80 @@ document.addEventListener("DOMContentLoaded", function () {
       selectedFilters.character = "All";
     }
 
-    selectedFilters.species = species || "All";
+    if (species && ["Human", "Alien"].includes(species)) {
+      selectedFilters.species = species;
+    } else {
+      selectedFilters.species = "All";
+    }
 
     const statusInput = document.getElementById("filter-status-hidden");
     const speciesInput = document.getElementById("filter-species-hidden");
     if (statusInput) statusInput.value = status;
     if (speciesInput) speciesInput.value = species;
+
+    setTimeout(updateFilterUI, 50);
+    console.log("📋 Filtros inicializados:", selectedFilters);
   })();
 
+  // ==========================================
+  // APPLY FILTERS
+  // ==========================================
+  document.getElementById("apply-filters")?.addEventListener("click", function() {
+    console.log("🔍 Aplicando filtros...", selectedFilters);
+
+    // Deshabilitar el botón inmediatamente
+    this.disabled = true;
+    this.classList.add('opacity-50', 'cursor-not-allowed');
+    this.classList.remove('hover:bg-[#5B38B0]');
+
+    const statusInput = document.getElementById("filter-status-hidden");
+    const speciesInput = document.getElementById("filter-species-hidden");
+    const searchForm = document.getElementById("search-form");
+
+    let statusValue = "";
+    if (selectedFilters.character === "Starred") {
+      statusValue = "starred";
+    } else if (selectedFilters.character === "Others") {
+      statusValue = "others";
+    }
+
+    let speciesValue = "";
+    if (selectedFilters.species !== "All") {
+      speciesValue = selectedFilters.species;
+    }
+
+    if (statusInput) statusInput.value = statusValue;
+    if (speciesInput) speciesInput.value = speciesValue;
+
+    if (searchForm) {
+      const params = new URLSearchParams(window.location.search);
+      if (statusValue) {
+        params.set("status", statusValue);
+      } else {
+        params.delete("status");
+      }
+      if (speciesValue) {
+        params.set("species", speciesValue);
+      } else {
+        params.delete("species");
+      }
+
+      const nameInput = searchForm.querySelector('input[name="name"]');
+      if (nameInput && nameInput.value) {
+        params.set("name", nameInput.value);
+      } else {
+        params.delete("name");
+      }
+
+      window.location.href = "?" + params.toString();
+    }
+
+    if (popup) popup.classList.add("hidden");
+  });
+
+  // ==========================================
+  // FAVORITES
+  // ==========================================
   var STORAGE_KEY = "rm-favorites";
 
   function getFavs() {
@@ -198,7 +277,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // ========== THE ONLY FUNCTION THAT MATTERS ==========
   function rebuildStarredFromLocalStorage() {
     var favs = getFavs();
     var starredSection = document.getElementById("starred-section");
@@ -211,7 +289,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Load ALL favorites from API
     fetch("api/characters.php?ids=" + favs.join(","))
       .then(function (r) {
         return r.json();
@@ -229,7 +306,9 @@ document.addEventListener("DOMContentLoaded", function () {
   initFavButtons();
   rebuildStarredFromLocalStorage();
 
-  // ========== INFINITE SCROLL ==========
+  // ==========================================
+  // INFINITE SCROLL
+  // ==========================================
   var list = document.getElementById("characters-list");
   if (!list) return;
 
@@ -241,10 +320,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (loading || done) return;
     loading = true;
     page++;
-    var name = new URLSearchParams(window.location.search).get("name") || "";
+    var params = new URLSearchParams(window.location.search);
+    var name = params.get("name") || "";
+    var status = params.get("status") || "";
+    var species = params.get("species") || "";
 
     fetch(
-      "api/characters.php?page=" + page + "&name=" + encodeURIComponent(name),
+      "api/characters.php?page=" + page + 
+      "&name=" + encodeURIComponent(name) +
+      "&status=" + encodeURIComponent(status) +
+      "&species=" + encodeURIComponent(species)
     )
       .then(function (r) {
         return r.json();

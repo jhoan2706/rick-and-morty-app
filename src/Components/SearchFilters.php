@@ -7,7 +7,7 @@ use App\Utils\Helpers;
 class SearchFilters
 {
     private const CHARACTER_OPTIONS = ['All', 'Starred', 'Others'];
-    private const SPECIES_OPTIONS = ['All', 'Human', 'Alien', 'Humanoid', 'Poopybutthole', 'Mythological', 'Animal', 'Robot', 'Cronenberg', 'Disease', 'Unknown', 'Planet'];
+    private const SPECIES_OPTIONS = ['All', 'Human', 'Alien'];
     
     public static function render(array $currentFilters = []): string
     {
@@ -25,7 +25,9 @@ class SearchFilters
                 <div class="flex gap-2">';
         
         foreach (self::CHARACTER_OPTIONS as $option) {
-            $activeClass = ($option === $currentCharacter) 
+            // Determinar si está activo
+            $isActive = ($option === $currentCharacter);
+            $activeClass = $isActive 
                 ? 'border-[#6B46C1] bg-[#EEE3FF] text-[#6B46C1]' 
                 : 'border-[#E8E8E8] bg-white text-[#1E1E1E]';
             
@@ -34,7 +36,7 @@ class SearchFilters
                         type="button" 
                         data-filter="character" 
                         data-value="' . $option . '"
-                        class="flex h-11 flex-1 items-center justify-center rounded-xl border text-sm font-semibold transition hover:bg-gray-50 ' . $activeClass . '"
+                        class="filter-option flex h-11 flex-1 items-center justify-center rounded-xl border text-sm font-semibold transition hover:bg-gray-50 ' . $activeClass . '"
                     >' . $option . '</button>';
         }
         
@@ -44,11 +46,12 @@ class SearchFilters
             
             <!-- Specie -->
             <div>
-                <h3 class="mb-3 text-base font-semibold text-gray-700">Specie</h3>
-                <div class="flex flex-wrap gap-2">';
+                <h3 class="mb-3 text-base font-semibold text-gray-700">Species</h3>
+                <div class="flex gap-2">';
         
         foreach (self::SPECIES_OPTIONS as $option) {
-            $activeClass = ($option === $currentSpecies) 
+            $isActive = ($option === $currentSpecies);
+            $activeClass = $isActive 
                 ? 'border-[#6B46C1] bg-[#EEE3FF] text-[#6B46C1]' 
                 : 'border-[#E8E8E8] bg-white text-[#1E1E1E]';
             
@@ -57,7 +60,7 @@ class SearchFilters
                         type="button" 
                         data-filter="species" 
                         data-value="' . $option . '"
-                        class="flex h-11 flex-1 min-w-[75px] items-center justify-center rounded-xl border text-sm font-semibold transition hover:bg-gray-50 ' . $activeClass . '"
+                        class="filter-option flex h-11 flex-1 items-center justify-center rounded-xl border text-sm font-semibold transition hover:bg-gray-50 ' . $activeClass . '"
                     >' . $option . '</button>';
         }
         
@@ -69,7 +72,8 @@ class SearchFilters
             <button 
                 type="button" 
                 id="apply-filters"
-                class="mt-5 h-11 w-full rounded-xl bg-[#6B46C1] text-sm font-medium text-white transition hover:bg-[#5B38B0]"
+                disabled
+                class="mt-5 h-11 w-full rounded-xl bg-[#6B46C1] text-sm font-medium text-white opacity-50 transition cursor-not-allowed"
             >
                 Filter
             </button>
