@@ -494,22 +494,33 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function rebuildStarredFromLocalStorage() {
-    var favs = getFavs();
-    var starredSection = document.getElementById("starred-section");
-    var starredList = document.getElementById("starred-list");
-    var starredCount = document.getElementById("starred-count");
+      var favs = getFavs();
+      var starredSection = document.getElementById("starred-section");
+      var starredList = document.getElementById("starred-list");
+      var starredCount = document.getElementById("starred-count");
 
-    if (!starredSection || !starredList || !starredCount) return;
+      if (!starredSection || !starredList || !starredCount) return;
 
-    if (favs.length === 0) {
-      starredSection.style.display = "none";
-      starredList.innerHTML = "";
-      return;
-    }
+      if (favs.length === 0) {
+        starredSection.style.display = "none";
+        starredList.innerHTML = "";
+        starredList.style.maxHeight = "";
+        starredList.style.overflowY = "";
+        return;
+      }
 
-    renderStarredFromCache();
-    // Make sure to initialize mobile links after a short delay to ensure the DOM is updated
-    setTimeout(initMobileLinks, 100);
+      renderStarredFromCache();
+      
+      // Activate scroll if there are more than 3 starred characters
+      if (favs.length > 3) {
+        starredList.style.maxHeight = "250px";
+        starredList.style.overflowY = "auto";
+      } else {
+        starredList.style.maxHeight = "";
+        starredList.style.overflowY = "";
+      }
+      
+      setTimeout(initMobileLinks, 100);
   }
 
   initFavButtons();

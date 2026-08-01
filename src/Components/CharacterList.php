@@ -14,11 +14,11 @@ class CharacterList
         if (!empty($filters['species'])) $activeFilters++;
         if (!empty($filters['gender'])) $activeFilters++;
         
-        $html = '<div class="flex-1 flex flex-col min-h-0 mt-10">';
+        $html = '<div class="flex-1 flex flex-col min-h-0 mt-8">';
         
         // === BOX DE SUMMARY ARRIBA DE STARRED ===
         $html .= '
-        <div class="mx-4 mb-2 rounded-lg bg-white shadow-sm" style="padding: 1.5rem 2.5rem !important;">
+        <div class="mx-4 rounded-lg bg-white shadow-sm" style="padding: 0.0rem 2.5rem !important;">
             <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important;">
                 <span class="text-sm font-semibold" style="flex-shrink: 0; color: #2563EB;">
                     <span id="total-characters-count">' . $totalResults . '</span> Results
@@ -32,11 +32,11 @@ class CharacterList
         // === STARRED SECTION ===
         $html .= '<div id="starred-section" style="display:none">';
         $html .= '<h2 class="px-10 pt-6 text-xs font-semibold uppercase tracking-wider text-gray-500 flex-shrink-0">Starred Characters (<span id="starred-count">0</span>)</h2>';
-        $html .= '<div id="starred-list" class="mt-3 px-4 space-y-1 flex-shrink-0"></div>';
+        $html .= '<div id="starred-list" class="mt-3 px-4 space-y-1 flex-shrink-0" style="max-height: 300px; overflow-y: auto;"></div>';
         $html .= '</div>';
         
         // === CHARACTERS SECTION ===
-        $html .= '<h2 class="px-10 pt-6 mt-6 text-xs font-semibold uppercase tracking-wider text-gray-500 flex-shrink-0">Characters (<span id="characters-count">' . count($characters) . '</span>)</h2>';
+        $html .= '<h2 class="px-10 pt-6 text-xs font-semibold uppercase tracking-wider text-gray-500 flex-shrink-0">Characters (<span id="characters-count">' . count($characters) . '</span>)</h2>';
         $html .= '<div class="mt-3 px-4 space-y-1 overflow-y-auto flex-1" id="characters-list" data-page="1">';
         
         if (empty($characters)) {
