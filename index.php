@@ -112,7 +112,7 @@ if ($selectedId) {
     <aside class="aside-main border-r border-gray-100 bg-white flex flex-col flex-shrink-0 h-screen overflow-hidden">
         <div class="px-6 pt-12 flex-shrink-0">
             <h1 class="text-[24px] font-bold text-gray-900">
-                <a href="/rick-and-morty-app/" class="hover:opacity-80 transition-opacity">Rick and Morty list</a>
+                <a href="/" class="hover:opacity-80 transition-opacity">Rick and Morty list</a>
             </h1>
 
             <!-- SearchBar contains search functionality -->

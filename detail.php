@@ -11,7 +11,7 @@ use App\Components\CharacterDetail;
 $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 if (!$id) {
-    header('Location: /rick-and-morty-app/');
+    header('Location: /');
     exit;
 }
 
@@ -25,7 +25,7 @@ try {
 }
 
 if (!$character) {
-    header('Location: /rick-and-morty-app/');
+    header('Location: /');
     exit;
 }
 
@@ -82,7 +82,7 @@ if (!$character) {
 
     <!-- Header with back button -->
     <div>
-        <a href="/rick-and-morty-app/" class="back-button">
+        <a href="/" class="back-button">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#8054C7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
