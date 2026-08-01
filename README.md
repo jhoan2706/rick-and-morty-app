@@ -6,6 +6,14 @@ The project follows a **component-based architecture**, uses **PSR-4 autoloading
 
 ---
 
+# 🌐 Live Demo
+
+🚀 **Try the application online:**
+
+https://rick-and-morty-app.wasmer.app/
+
+---
+
 ## 📸 Preview
 
 ### Desktop
