@@ -12,6 +12,7 @@ use App\Components\CharacterDetail;
 
 $filters = [
     'name' => $_GET['name'] ?? null,
+    'characterType' => $_GET['characterType'] ?? null,
     'status' => $_GET['status'] ?? null,
     'species' => $_GET['species'] ?? null,
     'gender' => $_GET['gender'] ?? null,
@@ -27,9 +28,15 @@ $info = ['count' => 0];
 $error = null;
 
 try {
-    $data = $api->getCharacters($filters, 1);
-    $characters = $data['results'] ?? [];
-    $info = $data['info'] ?? $info;
+    // If the characterType filter is set to 'starred', we don't fetch characters from the API, as they will be loaded separately based on starred IDs.
+    if (($filters['characterType'] ?? '') === 'starred') {
+        $characters = [];
+        $info = ['count' => 0];
+    } else {
+        $data = $api->getCharacters($filters, 1);
+        $characters = $data['results'] ?? [];
+        $info = $data['info'] ?? $info;
+    }
 } catch (\RuntimeException $e) {
     $error = $e->getMessage();
 }

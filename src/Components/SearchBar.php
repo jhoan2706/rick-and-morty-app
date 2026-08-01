@@ -41,6 +41,7 @@ class SearchBar
                     </button>
                 </div>
                 
+                <input type="hidden" name="characterType" value="' . Helpers::escape($filters['characterType'] ?? '') . '" id="filter-characterType-hidden">
                 <input type="hidden" name="status" value="' . Helpers::escape($filters['status'] ?? '') . '" id="filter-status-hidden">
                 <input type="hidden" name="species" value="' . Helpers::escape($filters['species'] ?? '') . '" id="filter-species-hidden">
                 <input type="hidden" name="gender" value="' . Helpers::escape($filters['gender'] ?? '') . '" id="filter-gender-hidden">

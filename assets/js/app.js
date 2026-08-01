@@ -16,12 +16,21 @@ document.addEventListener("DOMContentLoaded", function () {
     const params = new URLSearchParams(window.location.search);
     const status = params.get("status") || "";
     const species = params.get("species") || "";
+    const gender = params.get("gender") || "";
     const name = params.get("name") || "";
 
     let activeFilters = 0;
-    if (status) activeFilters++;
-    if (species) activeFilters++;
+
     if (name) activeFilters++;
+    if (species && species !== "All") activeFilters++;
+    if (gender && gender !== "All") activeFilters++;
+    if (
+      status &&
+      status !== "starred" &&
+      status !== "others" &&
+      status !== "All"
+    )
+      activeFilters++;
 
     const filterText =
       activeFilters + " " + (activeFilters === 1 ? "Filter" : "Filters");
@@ -86,11 +95,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ==========================================
-  // FILTERS - SELECT OPTIONS (fixed)
+  // FILTERS - SELECT OPTIONS
   // ==========================================
   let selectedFilters = {
-    character: "All",
+    characterType: "All",
     species: "All",
+    status: "All",
+    gender: "All",
   };
 
   function checkFilterChanges() {
@@ -98,8 +109,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!applyBtn) return;
 
     const params = new URLSearchParams(window.location.search);
+    const currentCharacterType = params.get("characterType") || "";
     const currentStatus = params.get("status") || "";
     const currentSpecies = params.get("species") || "";
+    const currentGender = params.get("gender") || "";
     const currentName = params.get("name") || "";
 
     let currentCharacter = "All";
@@ -110,13 +123,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const currentSpeciesUI = currentSpecies || "All";
-
-    // Get the current value of the search input
+    const currentStatusUI = currentStatus || "All";
+    const currentGenderUI = currentGender || "All";
     const searchInputValue = searchInput ? searchInput.value.trim() : "";
 
     const hasChanges =
-      selectedFilters.character !== currentCharacter ||
+      selectedFilters.characterType !== currentCharacter ||
       selectedFilters.species !== currentSpeciesUI ||
+      selectedFilters.status !== currentStatusUI ||
+      selectedFilters.gender !== currentGenderUI ||
       searchInputValue !== currentName;
 
     if (hasChanges) {
@@ -133,10 +148,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to update the UI of filter buttons based on selectedFilters
   function updateFilterUI() {
     document
-      .querySelectorAll('.filter-option[data-filter="character"]')
+      .querySelectorAll('.filter-option[data-filter="characterType"]')
       .forEach(function (btn) {
         const value = btn.dataset.value;
-        if (value === selectedFilters.character) {
+        if (value === selectedFilters.characterType) {
           btn.className = btn.className
             .replace(/border-\[\#E8E8E8\]/g, "border-[#6B46C1]")
             .replace(/bg-white/g, "bg-[#EEE3FF]")
@@ -166,6 +181,40 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
+    document
+      .querySelectorAll('.filter-option[data-filter="status"]')
+      .forEach(function (btn) {
+        const value = btn.dataset.value;
+        if (value === selectedFilters.status) {
+          btn.className = btn.className
+            .replace(/border-\[\#E8E8E8\]/g, "border-[#6B46C1]")
+            .replace(/bg-white/g, "bg-[#EEE3FF]")
+            .replace(/text-\[\#1E1E1E\]/g, "text-[#6B46C1]");
+        } else {
+          btn.className = btn.className
+            .replace(/border-\[\#6B46C1\]/g, "border-[#E8E8E8]")
+            .replace(/bg-\[\#EEE3FF\]/g, "bg-white")
+            .replace(/text-\[\#6B46C1\]/g, "text-[#1E1E1E]");
+        }
+      });
+
+    document
+      .querySelectorAll('.filter-option[data-filter="gender"]')
+      .forEach(function (btn) {
+        const value = btn.dataset.value;
+        if (value === selectedFilters.gender) {
+          btn.className = btn.className
+            .replace(/border-\[\#E8E8E8\]/g, "border-[#6B46C1]")
+            .replace(/bg-white/g, "bg-[#EEE3FF]")
+            .replace(/text-\[\#1E1E1E\]/g, "text-[#6B46C1]");
+        } else {
+          btn.className = btn.className
+            .replace(/border-\[\#6B46C1\]/g, "border-[#E8E8E8]")
+            .replace(/bg-\[\#EEE3FF\]/g, "bg-white")
+            .replace(/text-\[\#6B46C1\]/g, "text-[#1E1E1E]");
+        }
+      });
+
     checkFilterChanges();
   }
 
@@ -176,10 +225,14 @@ document.addEventListener("DOMContentLoaded", function () {
       const filterType = this.dataset.filter;
       const value = this.dataset.value;
 
-      if (filterType === "character") {
-        selectedFilters.character = value;
+      if (filterType === "characterType") {
+        selectedFilters.characterType = value;
       } else if (filterType === "species") {
         selectedFilters.species = value;
+      } else if (filterType === "status") {
+        selectedFilters.status = value;
+      } else if (filterType === "gender") {
+        selectedFilters.gender = value;
       }
 
       updateFilterUI();
@@ -196,15 +249,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // Init filters from URL on page load
   (function initFiltersFromURL() {
     const params = new URLSearchParams(window.location.search);
+    const characterType = params.get("characterType") || "";
     const status = params.get("status") || "";
     const species = params.get("species") || "";
+    const gender = params.get("gender") || "";
 
     if (status === "starred") {
       selectedFilters.character = "Starred";
+      selectedFilters.status = "All";
     } else if (status === "others") {
       selectedFilters.character = "Others";
+      selectedFilters.status = "All";
     } else {
       selectedFilters.character = "All";
+      selectedFilters.status = status || "All";
     }
 
     if (species && ["Human", "Alien"].includes(species)) {
@@ -213,10 +271,22 @@ document.addEventListener("DOMContentLoaded", function () {
       selectedFilters.species = "All";
     }
 
+    if (
+      gender &&
+      ["Male", "Female", "Genderless", "unknown"].includes(gender)
+    ) {
+      selectedFilters.gender = gender;
+    } else {
+      selectedFilters.gender = "All";
+    }
+
     const statusInput = document.getElementById("filter-status-hidden");
     const speciesInput = document.getElementById("filter-species-hidden");
+    const genderInput = document.getElementById("filter-gender-hidden");
+
     if (statusInput) statusInput.value = status;
     if (speciesInput) speciesInput.value = species;
+    if (genderInput) genderInput.value = gender;
 
     setTimeout(updateFilterUI, 50);
   })();
@@ -378,10 +448,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (missingIds.length > 0) {
       var url = "api/characters.php?ids=" + missingIds.join(",");
       fetch(url)
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          return r.json();
+        })
         .then(function (data) {
           if (data.html) {
-            // Update the cache with the newly fetched data
             var tempDiv = document.createElement("div");
             tempDiv.innerHTML = data.html;
             var items = tempDiv.querySelectorAll(".favorite-btn");
@@ -389,7 +460,8 @@ document.addEventListener("DOMContentLoaded", function () {
               var id = parseInt(btn.dataset.id);
               var img = btn.parentElement.querySelector("img");
               var nameEl = btn.parentElement.querySelector("p.font-semibold");
-              var speciesEl = btn.parentElement.querySelectorAll("p.text-gray-500")[0];
+              var speciesEl =
+                btn.parentElement.querySelectorAll("p.text-gray-500")[0];
               if (id && img && nameEl && speciesEl) {
                 var cache = getStarredCache();
                 cache[id] = {
@@ -414,8 +486,8 @@ document.addEventListener("DOMContentLoaded", function () {
       initFavButtons();
       initMobileLinks();
     } else {
-      // If there are no cached items, show a loading message while fetching from the API
-      starredList.innerHTML = '<p class="px-6 py-4 text-sm text-gray-400">Loading starred characters...</p>';
+      starredList.innerHTML =
+        '<p class="px-6 py-4 text-sm text-gray-400">Loading starred characters...</p>';
       starredCount.textContent = favs.length;
       starredSection.style.display = "block";
     }
@@ -487,18 +559,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var params = new URLSearchParams(window.location.search);
     var name = params.get("name") || "";
+    var characterType = params.get("characterType") || "";
     var status = params.get("status") || "";
     var species = params.get("species") || "";
+    var gender = params.get("gender") || "";
     var selectedId = params.get("id") || "";
 
     var url = "api/characters.php?page=" + page;
     if (name) url += "&name=" + encodeURIComponent(name);
+    if (characterType)
+      url += "&characterType=" + encodeURIComponent(characterType);
     if (status) url += "&status=" + encodeURIComponent(status);
     if (species) url += "&species=" + encodeURIComponent(species);
+    if (gender) url += "&gender=" + encodeURIComponent(gender);
     if (selectedId) url += "&selected_id=" + selectedId;
 
-    // If the filter is "starred" or "others", we need to pass the IDs of the favorites to the API
-    if (status === "starred" || status === "others") {
+    if (characterType === "starred" || characterType === "others") {
       var favs = getFavs();
       if (favs.length > 0) {
         url += "&starred_ids=" + favs.join(",");
@@ -573,15 +649,20 @@ document.addEventListener("DOMContentLoaded", function () {
     var name = params.get("name") || "";
     var status = params.get("status") || "";
     var species = params.get("species") || "";
+    var gender = params.get("gender") || "";
     var selectedId = params.get("id") || "";
+    var characterType = params.get("characterType") || "";
 
     var url = "api/characters.php?page=1";
     if (name) url += "&name=" + encodeURIComponent(name);
     if (status) url += "&status=" + encodeURIComponent(status);
     if (species) url += "&species=" + encodeURIComponent(species);
+    if (gender) url += "&gender=" + encodeURIComponent(gender);
     if (selectedId) url += "&selected_id=" + selectedId;
+    if (characterType)
+      url += "&characterType=" + encodeURIComponent(characterType);
 
-    if (status === "starred" || status === "others") {
+    if (characterType === "starred" || characterType === "others") {
       var favs = getFavs();
       if (favs.length > 0) {
         url += "&starred_ids=" + favs.join(",");
@@ -636,15 +717,26 @@ document.addEventListener("DOMContentLoaded", function () {
       this.classList.add("opacity-50", "cursor-not-allowed");
       this.classList.remove("hover:bg-[#5B38B0]");
 
+      const characterTypeInput = document.getElementById(
+        "filter-characterType-hidden",
+      );
       const statusInput = document.getElementById("filter-status-hidden");
       const speciesInput = document.getElementById("filter-species-hidden");
+      const genderInput = document.getElementById("filter-gender-hidden");
       const searchForm = document.getElementById("search-form");
 
+      // characterType: Starred / Others / All
+      let characterTypeValue = "";
+      if (selectedFilters.characterType === "Starred") {
+        characterTypeValue = "starred";
+      } else if (selectedFilters.characterType === "Others") {
+        characterTypeValue = "others";
+      }
+
+      // status: Alive / Dead / unknown / All
       let statusValue = "";
-      if (selectedFilters.character === "Starred") {
-        statusValue = "starred";
-      } else if (selectedFilters.character === "Others") {
-        statusValue = "others";
+      if (selectedFilters.status !== "All") {
+        statusValue = selectedFilters.status;
       }
 
       let speciesValue = "";
@@ -652,8 +744,15 @@ document.addEventListener("DOMContentLoaded", function () {
         speciesValue = selectedFilters.species;
       }
 
+      let genderValue = "";
+      if (selectedFilters.gender !== "All") {
+        genderValue = selectedFilters.gender;
+      }
+
+      if (characterTypeInput) characterTypeInput.value = characterTypeValue;
       if (statusInput) statusInput.value = statusValue;
       if (speciesInput) speciesInput.value = speciesValue;
+      if (genderInput) genderInput.value = genderValue;
 
       const params = new URLSearchParams();
 
@@ -664,8 +763,10 @@ document.addEventListener("DOMContentLoaded", function () {
         params.set("name", nameInput.value.trim());
       }
 
+      if (characterTypeValue) params.set("characterType", characterTypeValue);
       if (statusValue) params.set("status", statusValue);
       if (speciesValue) params.set("species", speciesValue);
+      if (genderValue) params.set("gender", genderValue);
 
       const newUrl = params.toString()
         ? "?" + params.toString()
@@ -709,6 +810,5 @@ document.addEventListener("DOMContentLoaded", function () {
   var originalLoadMore = loadMore;
   loadMore = function () {
     originalLoadMore();
-    // initMobileLinks is already called after new items are loaded, so we don't need to call it here again
   };
 });
