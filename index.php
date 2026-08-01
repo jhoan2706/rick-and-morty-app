@@ -95,7 +95,7 @@ if ($selectedId) {
 
         @media (max-width: 767px) {
             #apply-filters {
-                margin-top: 150% !important;
+                margin-top: 70% !important;
             }
         }
 
